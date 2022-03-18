@@ -72,7 +72,7 @@ function createConnection({path, schema}){
     }
     database = await getSqliteDatabase({path});
     if (database.err) {
-      throw Error (`cannot open database ${path}`);
+      console.log(database.err)
       return resolve({ err: database.err });
     }
     database = database.opened;

@@ -13,6 +13,7 @@ exports.signin = async(req,res)=>{
       return res.status(400).json({error:err.toString()});
     }
     const {id,email,name,role} = user;
+    console.log(user);
     if (isMatch) {
       const token = jwt.sign({id:id,role:role},process.env.JWT_SECRET,{
         algorithm: "HS256",
