@@ -1,0 +1,53 @@
+<script src="/asset/static/components.js" charset="utf-8"> </script>
+<script type="text/javascript">
+  (async()=>{
+    let page = $(`<div style="width:100%; height:100%; display:grid; grid-template-columns:max-content auto; grid-template-row:auto; grid-row-gap:10px;"></div>`);
+    $("body").append(page);
+    let routeLinkArea = $(`<div style="width:100%;"></div>`);
+    let routerBodyARea= $(`<div style="width:100%;overflow:scroll;"></div>`);
+    page.append(routeLinkArea,routerBodyARea);
+
+    let links = {};
+    const highlightLink = ({label})=>{
+      for(let l in links){
+        if(label ===l){
+          links[l].btn.css({"color":"dodgerblue","cursor":"default"});
+        }else{
+          links[l].btn.css({"color":"inherit","cursor":"pointer"});
+        }
+      }
+    };
+    const addLink=({label,link})=>{
+      let btn = $(`<a href="${link}" style="cursor:pointer; background-color:inherit; border:none;color:var(--dark-text-color);border-bottom:2px; solid inherit;outline:none;font-size:1.3em;margin:0px; text-decoration:none;padding:3px;" target="_blank">${label}</a>`);
+      routeLinkArea.append(btn,"<br>");
+      links[label] = {btn};
+      btn.click((e)=>{
+        if(!e.metaKey){
+          e.stopPropagation();
+          e.preventDefault();
+          return router.render(link);
+        }
+      });
+      return btn;
+    };
+    const router = new Router({host:routerBodyARea});
+    let assignmentLink = addLink({label:"space",link:`/view/space`});
+    let carLink = addLink({label:"card",link:`/view/card`});
+    // let onHoldTask = addLink({label:"Snooze",link:`/dashboard/task/snoozed/${AppUser}`});
+    // let taskLink = addLink({label:"Tasks",link:"/dashboard/task"});
+    router.addRoute("/view/space",{highlightLink:false,exact:true,component:new SpacePage({name:"space",router,type:"assignments"})});
+    router.addRoute("/view/card",{highlightLink:false,exact:true,component:new CardPage({name:"card",router,type:"assignments"})});
+    // router.addRoute("/dashboard/task/snoozed/:userId",{highlightLink:onHoldTask,exact:true,component:new UserTasks({name:"snoozed",router,type:"snoozed"})});
+    // router.addRoute("/dashboard/task",{highlightLink:taskLink,exact:true,component:new UserTasks({name:"all-tasks",router,type:"all"})});
+    // // router.addRoute("/dashboard/tasks/:id/test/:current",{component:new RouterComponent({name:"test",router}),exact:true});
+    // // router.addRoute("/dashboard/tasks/narrative",{component:new RouterComponent({name:"narrative-tasks",router}),exact:true});
+    // router.addRoute("/dashboard/task/task/:id",{highlightLink:taskLink,component:new TaskView({name:"/dashboard/task/:id",router}),exact:true});
+    // router.addRoute("/dashboard/task/new",{highlightLink:taskLink,exact:true,component:new NewTaskView({name:"create-new",router,type:"create-new-task"})});
+    // router.addRoute("/dashboard/task/new/choose",{highlightLink:taskLink,exact:true,component:new TaskTemplateView({name:"create-new-choose",router,type:"create-new-task-choose"})});
+    // router.error(404,{component:new View404({name:"/dashboard/task/:id",router})});
+    router.render("/view/space");
+    window.addEventListener("popstate",(state)=>{
+      router.render();
+    });
+  })();
+</script>

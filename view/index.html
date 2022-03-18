@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <script src="https://code.jquery.com/jquery-2.0.2.min.js"> </script>
+    <script src="components.js"> </script>
+    <script src="../services/api.js"> </script>
+    <script type="text/javascript">
+      let container = $(`<div></div>`);
+      $("body").append(container);
+      const loginView =  new LoginView({host:container});
+
+      loginView.on("submit",(args)=>{
+        APIService.login({
+          email:args.email,
+          password:args.password
+        }).then((success)=>{
+            console.log(success);
+            if(success.user){
+              APIService.setUser(success.user);
+            }
+            // APIService.testAuth().then((success)=>{
+            //     console.log(success,"granted access");
+            // }).catch((error)=>{
+            //     console.log(error);
+            // });
+        }).catch((error)=>{
+            console.log(error);
+        });
+      });
+
+
+
+      // APIService.signup({
+      //   name:"lkonat",
+      //   email:'konate011@gmail.com',
+      //   password:"1234567",
+      //   password2:"1234567"
+      // }).then((success)=>{
+      //     console.log(success);
+      // }).catch((error)=>{
+      //     console.log(error);
+      // });
+console.log("USER: ",APIService.getUser());
+      // APIService.testAuth().then((success)=>{
+      //     console.log(success,"granted access");
+      // }).catch((error)=>{
+      //     console.log(error);
+      // });
+
+      // APIService.createSpace({spaceName:"Python"}).then((success)=>{
+      //     console.log(success,"createSpace");
+      // }).catch((error)=>{
+      //     console.log(error,"createSpace");
+      // });
+      // APIService.createSpace({spaceName:"Node"}).then((success)=>{
+      //     console.log(success,"createSpace");
+      // }).catch((error)=>{
+      //     console.log(error,"createSpace");
+      // });
+
+
+      APIService.getSpaces().then((success)=>{
+          console.log(success,"getSpaces");
+      }).catch((error)=>{
+          console.log(error);
+      });
+    </script>
+  </body>
+</html>

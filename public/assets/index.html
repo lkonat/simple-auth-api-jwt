@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title></title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+  <body>
+    <script src="https://code.jquery.com/jquery-2.0.2.min.js"> </script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
+    <script src="/assets/navigation.js" charset="utf-8"> </script>
+    <script src="/assets/flashcardComponents.js" charset="utf-8"> </script>
+    <script src="/assets/components.js" charset="utf-8"> </script>
+    <script src="/assets/api.js" charset="utf-8"> </script>
+
+    <script type="text/javascript">
+      (async()=>{
+        console.log("naviagation", Navigation);
+        let page = $(`<div style="width:100%; height:100vh;  display:grid; grid-template-rows:max-content auto; grid-template-columns:auto; grid-row-gap:10px;"></div>`);
+        $("body").append(page);
+        let routeLinkArea = $(`<div style="width:100%;background-color:lightgrey;"></div>`);
+        let routerBodyARea= $(`<div style="width:100%;overflow:scroll;"></div>`);
+        page.append(routeLinkArea,routerBodyARea);
+
+        let links = {};
+        const highlightLink = ({label})=>{
+          for(let l in links){
+            if(label ===l){
+              links[l].btn.css({"color":"dodgerblue","cursor":"default"});
+            }else{
+              links[l].btn.css({"color":"inherit","cursor":"pointer"});
+            }
+          }
+        };
+        const addLink=({label,link})=>{
+          let btn = $(`<a href="${link}" style="cursor:pointer; background-color:inherit; border:none;color:var(--dark-text-color);border-bottom:2px; solid inherit;outline:none;font-size:1.3em;margin:0px; text-decoration:none;padding:3px;" target="_blank">${label}</a>`);
+          routeLinkArea.append(btn);
+          links[label] = {btn};
+          btn.click((e)=>{
+            if(!e.metaKey){
+              e.stopPropagation();
+              e.preventDefault();
+              return router.render(link);
+            }
+          });
+          return btn;
+        };
+        const router = new Navigation.Router({host:routerBodyARea});
+        let assignmentLink = addLink({label:"space",link:`/space`});
+        let carLink = addLink({label:"card",link:`/card`});
+        let loginLink = addLink({label:"login",link:`/login`});
+
+        function requireAuth(view,next){
+          let user  = APIService.getUser();
+          if(user){
+            next();
+          }else{
+            view.render("/login");
+          }
+        }
+        
+        APIService.on("logout",()=>{
+          router.render("/login");
+        });
+        router.route("/space",requireAuth,(view)=>{
+          view.render(new SpacesPage({name:"space"}));
+        });
+        router.route("/space/:spaceId",requireAuth,(view)=>{
+          view.render(new SpacePage({name:"space"}));
+        });
+        router.route("/card",requireAuth,(view)=>{
+          view.render(new CardPage({name:"card"}));
+        });
+        router.route("/login",(view)=>{
+          view.render(new LoginPage({name:"login"}));
+        });
+        router.render();
+      })();
+    </script>
+
+  </body>
+</html>
