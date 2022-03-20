@@ -99,7 +99,64 @@ function getItemContent(args){
     }
   });
 }
+function updateCard(args){
+  return new Promise(async(resolve, reject)=>{
+    try {
+      let outcome = await Controller._updateCard(args);
+      return resolve(outcome);
+    } catch (e) {
+      return reject(e);
+    }
+  });
+}
 
+function createSpaceItem(args){
+  return new Promise(async(resolve, reject)=>{
+    try {
+      let outcome = await Controller._addItemToSpace(args);
+      return resolve(outcome);
+    } catch (e) {
+      return reject(e);
+    }
+  });
+}
+
+function getSpaceItem(args){
+  return new Promise(async(resolve, reject)=>{
+    try {
+      let outcome = await Controller._getItem(args);
+      return resolve(outcome);
+    } catch (e) {
+      return reject(e);
+    }
+  });
+}
+function getSpaceItemChids(args){
+  return new Promise(async(resolve, reject)=>{
+    try {
+      let outcome = await Controller._getItemChilds(args);
+      return resolve(outcome);
+    } catch (e) {
+      return reject(e);
+    }
+  });
+}
+function updateItem(args){
+  return new Promise(async(resolve, reject)=>{
+    try {
+      let outcome = await Controller._updateItem(args);
+      return resolve(outcome);
+    } catch (e) {
+      return reject(e);
+    }
+  });
+}
+
+exports.updateItem = updateItem;
+exports.getSpaceItem = getSpaceItem;
+exports.getSpaceItemChids = getSpaceItemChids;
+exports.createSpaceItem = createSpaceItem;
+exports.updateCard = updateCard;
 exports.getItemContent= getItemContent;
 exports.getCard = getCard;
 exports.getFlashcardCards = getFlashcardCards;

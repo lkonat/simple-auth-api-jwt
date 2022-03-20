@@ -250,14 +250,89 @@
                 return reject(err);
             });
           });
-        }
+        },
+        updateCard: ({cardId,cardType,changes}) => {
+           return new Promise(function (resolve, reject) {
+             $.ajax({
+               type: "PUT",
+               url: `${hostName}/api/app/flashcard/card`,
+               contentType: "application/json",
+               headers:{"x-auth-token":SELF.TOKEN},
+               data: JSON.stringify({cardId,cardType,changes})
+             }).done((res) => {
+                 return resolve(res);
+             }).fail((err) => {
+                 return reject(err);
+             });
+           });
+         },
+         updateItem: ({spaceId,itemId,changes}) => {
+            return new Promise(function (resolve, reject) {
+              $.ajax({
+                type: "PUT",
+                url: `${hostName}/api/app/space/item`,
+                contentType: "application/json",
+                headers:{"x-auth-token":SELF.TOKEN},
+                data: JSON.stringify({spaceId,itemId,changes})
+              }).done((res) => {
+                  return resolve(res);
+              }).fail((err) => {
+                  return reject(err);
+              });
+            });
+          },
+       createSpaceItem: ({spaceId,parentId,folder,flashcard,flashcardCard}) => {
+          return new Promise(function (resolve, reject) {
+            $.ajax({
+              type: "POST",
+              url: `${hostName}/api/app/space/item`,
+              contentType: "application/json",
+              headers:{"x-auth-token":SELF.TOKEN},
+              data: JSON.stringify({spaceId,parentId,folder,flashcard,flashcardCard})
+            }).done((res) => {
+                return resolve(res);
+            }).fail((err) => {
+                return reject(err);
+            });
+          });
+        },
+        getSpaceItem: ({spaceId,itemId}) => {
+           return new Promise(function (resolve, reject) {
+             $.ajax({
+               type: "POST",
+               url: `${hostName}/api/app/space/item/info`,
+               contentType: "application/json",
+               headers:{"x-auth-token":SELF.TOKEN},
+               data: JSON.stringify({spaceId,itemId})
+             }).done((res) => {
+                 return resolve(res);
+             }).fail((err) => {
+                 return reject(err);
+             });
+           });
+         },
+         getSpaceItemChilds: ({spaceId,itemId}) => {
+            return new Promise(function (resolve, reject) {
+              $.ajax({
+                type: "POST",
+                url: `${hostName}/api/app/space/item/childs`,
+                contentType: "application/json",
+                headers:{"x-auth-token":SELF.TOKEN},
+                data: JSON.stringify({spaceId,itemId})
+              }).done((res) => {
+                  return resolve(res);
+              }).fail((err) => {
+                  return reject(err);
+              });
+            });
+          },
+
   };
   $.ajaxSetup({
     beforeSend: function (send) {
       console.log("send",send);
     },
     complete: function (done) {
-      console.log(done.status,done);
        if (done.status === 304 || done.status===401 || done.status ===403) {
         SELF.setLogout();
       }
@@ -279,4 +354,10 @@
   exports.getFlashcardCards = SELF.getFlashcardCards;
   exports.getCard = SELF.getCard;
   exports.getItemContent = SELF.getItemContent;
+  exports.updateCard = SELF.updateCard;
+
+  exports.getSpaceItem  = SELF.getSpaceItem;
+  exports.getSpaceItemChilds = SELF.getSpaceItemChilds;
+  exports.createSpaceItem = SELF.createSpaceItem;
+  exports.updateItem = SELF.updateItem;
 })(typeof exports === "undefined" ? (this.APIService = {}) : exports);

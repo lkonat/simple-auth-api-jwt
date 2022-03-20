@@ -17,6 +17,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-csv/0.71/jquery.csv-0.71.min.js"></script>
     <script src="/assets/navigation.js" charset="utf-8"> </script>
     <script src="/assets/flashcardComponents.js" charset="utf-8"> </script>
+    <script src="/assets/spaceFolderManager.js" charset="utf-8"></script>
     <script src="/assets/components.js" charset="utf-8"> </script>
     <script src="/assets/api.js" charset="utf-8"> </script>
 
@@ -65,7 +66,7 @@
             view.render("/login");
           }
         }
-        
+
         APIService.on("logout",()=>{
           router.render("/login");
         });

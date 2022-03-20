@@ -72,7 +72,7 @@ function getFlashcardCards(req,res){
 function getCard(req,res){
   const {id} = req.params;
   const userId = req?.auth?.id;
-  Model.getCard({cardId:id}).then((success)=>{
+  Model.getCard({cardId:id,userId}).then((success)=>{
     res.json(success);
   }).catch((err)=>{
     res.status(400).json({error:err});
@@ -88,6 +88,72 @@ function getItemContent(req,res){
   });
 }
 
+function updateCard(req,res){
+  const {cardId,cardType,changes} = req.body;
+  const userId = req?.auth?.id;
+  Model.updateCard({cardId,changes,cardType,userId}).then((success)=>{
+    res.json(success);
+  }).catch((err)=>{
+    res.status(400).json({error:err});
+  });
+}
+function createSpaceItem(req,res){
+  const {spaceId,parentId,folder,flashcard,flashcardCard} = req.body;
+  const userId = req?.auth?.id;
+  if(!userId){
+    return res.status(400).json({error:'user id is missing'});
+  }
+  Model.createSpaceItem({spaceId,parentId,folder,flashcard,flashcardCard,userId}).then((success)=>{
+    res.json(success);
+  }).catch((err)=>{
+    res.status(400).json({error:err});
+  });
+}
+
+function getSpaceItemChids(req,res){
+  const {spaceId,itemId} = req.body;
+  const userId = req?.auth?.id;
+  if(!userId){
+    return res.status(400).json({error:'user id is missing'});
+  }
+  Model.getSpaceItemChids({spaceId,itemId,userId}).then((success)=>{
+    res.json(success);
+  }).catch((err)=>{
+    res.status(400).json({error:err});
+  });
+}
+
+function getSpaceItem(req,res){
+  const {spaceId,itemId} = req.body;
+  const userId = req?.auth?.id;
+  if(!userId){
+    return res.status(400).json({error:'user id is missing'});
+  }
+  Model.getSpaceItem({spaceId,itemId,userId}).then((success)=>{
+    res.json(success);
+  }).catch((err)=>{
+    res.status(400).json({error:err});
+  });
+}
+
+function updateItem(req,res){
+  const {spaceId,itemId,changes} = req.body;
+  const userId = req?.auth?.id;
+  if(!userId){
+    return res.status(400).json({error:'user id is missing'});
+  }
+  Model.updateItem({spaceId,itemId,userId,changes}).then((success)=>{
+    res.json(success);
+  }).catch((err)=>{
+    res.status(400).json({error:err});
+  });
+}
+
+exports.updateItem = updateItem;
+exports.getSpaceItemChids= getSpaceItemChids;
+exports.getSpaceItem= getSpaceItem;
+exports.createSpaceItem = createSpaceItem;
+exports.updateCard = updateCard;
 exports.getItemContent = getItemContent;
 exports.getCard = getCard;
 exports.getFlashcardCards = getFlashcardCards;

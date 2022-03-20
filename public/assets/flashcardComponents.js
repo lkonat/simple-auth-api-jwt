@@ -22,26 +22,29 @@
     constructor(args) {
       super(args);
     }
+    save({spaceId,itemId,changes}){
+      return new Promise((resolve, reject)=>{
+        APIService.updateItem({spaceId,itemId,changes}).then((res)=>{
+          return resolve(res);
+        }).catch((err)=>{
+          return reject(err);
+        });
+      });
+    }
     render(){
       if(this.states.editing){
         this.menuView = document.createElement(`div`);
         this.menuView.style="display:flex; flex-direction:row-reverse;";
-        let doneBtn = document.createElement(`button`);
-        doneBtn.innerHTML ="Done";
-        this.menuView.appendChild(doneBtn);
+        let saveBtn = document.createElement(`button`);
+        saveBtn.innerHTML ="Save";
+        this.menuView.appendChild(saveBtn);
         this.titleInput = document.createElement("input");
         this.titleInput.setAttribute("type","text");
         this.titleInput.setAttribute("value",this.data.title);
         this.titleInput.style =`width:100%;`;
-
-
-
-
-
         this.textareaInput = document.createElement("textarea");
         this.textareaInput.setAttribute("value",this.data.text);
         this.textareaInput.style =`width:100%;`;
-
 
         let holder = document.createElement(`div`);
         holder.style=`width:100%; height:100%;dispay:grid; grid-template-rows:max-content max-content auto; grid-template-columns:auto;`;
@@ -49,8 +52,28 @@
         holder.appendChild(this.titleInput);
         holder.appendChild(this.textareaInput);
         this.container.appendChild(holder);
-        doneBtn.addEventListener("click",(e)=>{
-          this.setSates({editing:false});
+        saveBtn.addEventListener("click",async(e)=>{
+          let title = this.titleInput.value;
+          let text = this.textareaInput.value;
+          let changes  = {
+            item_name:title,
+            title,
+            text,
+            score:0,
+            pos:11
+          };
+          console.log(this.data,changes);
+        try {
+          let saved = await this.save({
+            spaceId:this.data.space_id,
+            itemId:this.data.item_id,
+            changes:changes
+          });
+          console.log(saved);
+          // this.setSates({editing:false});
+        } catch (e) {
+          console.log("saving error",e);
+        }
         });
       }else{
         this.menuView = document.createElement(`div`);
@@ -75,6 +98,8 @@
       }
     }
   }
+
+
   class Cart {
     constructor({host,cards}) {
       this.host = host;
@@ -109,10 +134,11 @@
       this.container.append(box);
       let width =200;
       let height = 100;
+      console.log({cards:this.cards});
       for(let i=0; i< this.cards.length; i++){
-        let title = this.cards[i]?.title;
-        let id = this.cards[i]?.card_id;
-        let one = $(`<div style="flex-basis:${width}px; flex-grow: 0;flex-shrink: 0; cursor:pointer; border:1px solid lightgrey; width:${width}px; height:${height}px; ">${title?title:i}</div>`);
+        let title = this.cards[i]?.item_name;
+        let id = this.cards[i]?.item_id;
+        let one = $(`<div style="display:flex;flex-basis:${width}px; flex-grow: 0;flex-shrink: 0; cursor:pointer; border:1px solid lightgrey; width:${width}px; height:${height}px;align-items:center; justify-content:center; color:grey; ">${title?title:i}</div>`);
         this.controllers[id] = {data:this.cards[i],view:one};
         box.append(one);
         one.click(()=>{
@@ -120,11 +146,12 @@
         });
       }
     }
-    addNewCard({at,item}){
-      if(at>=0){
-        this.cards.splice(at, 0, item);
+    addNewCard(args){
+      let items = Array.isArray(args.item)?args.item:[args.item];
+      if(("at" in args) && args.at>=0){
+        this.cards.splice(args.at, 0, ...items);
       }else{
-        this.cards.push(item);
+        this.cards =[...this.cards,...items];
       }
       this.render();
     }
@@ -172,18 +199,7 @@
       this.host = host;
       this.data = data;
       this.cEvents = {};
-      this.cards = cards?cards:[
-        // {title:"1",type:"basic",id:"1"},
-        // {title:"2",type:"basic",id:"2"},
-        // {title:"3",type:"basic",id:"3"},
-        // {title:"4",type:"basic",id:"4"},
-        // {title:"5",type:"basic",id:"5"},
-        // {title:"6",type:"basic",id:"6"},
-        // {title:"7",type:"basic",id:"7"},
-        // {title:"8",type:"basic",id:"8"},
-        // {title:"9",type:"basic",id:"9"},
-        // {title:"10",type:"basic",id:"10"}
-      ];
+      this.cards = cards?cards:[];
       this.menus =[{name:"add_new_card",label:"Add new card"}];
       this.render();
     }
@@ -205,44 +221,47 @@
       this.bottomArea = $(`<div style="width:100%;"></div>`);
       this.box.append(this.topArea,this.bottomArea);
       const flashcardId = this.data.item_id;
-      console.log({falscard:this.data});
+      const spaceId = this.data.space_id;
       const menus =[{name:"add_new_card",label:"Add new card"}];
       const tools = new Tools({host:this.toolArea,menus:this.menus});
       const cart = new Cart({host:this.bottomArea,cards:this.cards});
-      // const display = new Display({host:this.displayArea});
-      cart.on("selection",(card)=>{
-        console.log(card);
+      //const display = new Display({host:this.displayArea});
+      cart.on("selection",(item)=>{
+        console.log(item);
         this.displayArea.empty();
-        let cardC = new BasicCard({host:this.displayArea,data:card});
-        // display.show(card);
+        //fetch Card
+        APIService.getSpaceItem({
+            spaceId:item.space_id,
+            itemId:item.item_id
+        }).then((res)=>{
+          console.log(res);
+          if(res.card && res.card.card_type==="basic"){
+            let cardC = new BasicCard({host:this.displayArea,data:res.card});
+          }
+        }).catch((err)=>{
+          console.log(err);
+        });
       });
       tools.on("add_new_card",()=>{
-        console.log("newCard",this.data);
         let name = prompt("card title?");
-        if(name.length>=0){
-          APIService.createFlashcardcard({
-              flashcardId:flashcardId,
-              cardTitle:name,
-              cardType:"basic"
-          }).then((res)=>{
-            console.log("CREATED CARD",res);
-            if(res.card){
-              cart.addNewCard({at:0,item:res.card});
+        if(name?.length>=0){
+          APIService.createSpaceItem({
+            spaceId:spaceId,
+            parentId:flashcardId,
+            flashcardCard:{
+              item_name:name,
+              card_type:"basic",
+              text:`Hello world`
             }
-          }).catch((err)=>{
-            console.log(err);
+          }).then((res)=>{
+            let items = res.items;
+            cart.addNewCard({at:false,item:items});
+            console.log("ADDED flashcardCard ITEMS",res);
+          }).catch((e)=>{
+            console.log(e);
           });
         }
-        // cart.addNewCard({at:0,item:{title:"insert",type:'basic'}});
       });
-
-      // APIService.getFlashcardCards({
-      //     flashcardId:flashcardId,
-      // }).then((res)=>{
-      //   console.log("CARDS",res);
-      // }).catch((err)=>{
-      //   console.log(err);
-      // });
     }
   }
   exports.Board = Board;

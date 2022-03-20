@@ -9,7 +9,13 @@ const {
   addCardToFlashcard,
   getFlashcardCards,
   getItemContent,
-  getCard
+  getCard,
+  updateCard,
+  createSpaceItem,
+
+getSpaceItem,
+getSpaceItemChids,
+updateItem
 } = require("../controllers");
 const {ensureAuth,ensureAdmin} = require("../controllers/auth");
 const {body} = require('express-validator');
@@ -17,9 +23,17 @@ router.post('/space',ensureAuth,createSpace);
 router.get('/spaces',ensureAuth,getSpaces);
 router.post('/folder',ensureAuth,createFolder);
 router.get('/space/:spaceId',ensureAuth,getSpaceItems);
-router.get('/space/item/:itemId',ensureAuth,getItemContent);
+// router.get('/space/item/:itemId',ensureAuth,getItemContent);
 router.post('/flashcard/card',ensureAuth,addCardToFlashcard);
-router.get('/flashcard/:id',ensureAuth,getFlashcardCards);
-router.post('/flashcard',ensureAuth,createFlashcard);
-router.get('/flashcard/card/:id',ensureAuth,getCard);
+
+
+//
+// router.get('/flashcard/:id',ensureAuth,getFlashcardCards);
+// router.post('/flashcard',ensureAuth,createFlashcard);
+// router.get('/flashcard/card/:id',ensureAuth,getCard);
+
+router.post('/space/item',ensureAuth,createSpaceItem);
+router.post('/space/item/childs',ensureAuth,getSpaceItemChids);
+router.post('/space/item/info',ensureAuth,getSpaceItem);
+router.put('/space/item',ensureAuth,updateItem);
 module.exports = router;

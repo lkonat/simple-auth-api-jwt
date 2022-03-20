@@ -107,7 +107,7 @@ class SpaceFolder extends SpaceItems{
     this.host.append(box);
     let arraowView = $(`<div></div>`);
     let iconView = $(`<div><i class="fa fa-folder" aria-hidden="true"></i></div>`);
-    let nameView = $(`<div>${this.data?.name}</div>`);
+    let nameView = $(`<div>${this.data?.item_name}</div>`);
     box.append(arraowView,iconView,nameView);
     nameView.click((e)=>{
       e.stopPropagation();
@@ -128,7 +128,7 @@ class FlashCard extends SpaceItems{
     this.host.append(box);
     let arraowView = $(`<div></div>`);
     let iconView = $(`<div>*</div>`);
-    let nameView = $(`<div>${this.data?.name}</div>`);
+    let nameView = $(`<div>${this.data?.item_name}</div>`);
     nameView.click((e)=>{
       e.stopPropagation();
       this.fireEvent(`select`,this.data);
@@ -137,6 +137,42 @@ class FlashCard extends SpaceItems{
   }
 }
 
+
+
+
+
+
+
+
+
+
+class SpaceFolderManager {
+  constructor({host}) {
+    this.host = host;
+    this.container = $(`<div></div>`);
+    this.host.append(this.container);
+  }
+  on(ev,call){
+    this.cEvents[ev]= call;
+  }
+  fireEvent(ev,args){
+    if(this.cEvents[ev]){
+      this.cEvents[ev](args);
+    }
+  }
+  addItem({parentId,item}){
+    if(items[i].item_type==="folder"){
+      controller = new SpaceFolder({host:itemsArea,data:items[i]});
+    }else if (items[i].item_type==="flashcard") {
+      controller = new FlashCard({host:itemsArea,data:items[i]});
+    }
+    if(controller){
+      controller.on("select",(data)=>{
+        showBoard(data);
+      });
+    }
+  }
+}
 class SpacePage extends Navigation.Page {
   constructor(args) {
     super(args);
@@ -153,35 +189,61 @@ class SpacePage extends Navigation.Page {
     let spaceId = props.url.params.spaceId;
     console.log({spaceId});
     console.log(props);
-    const showBoard= async(item)=>{
-      boardArea.empty();
+    let addFolder = $(`<div style="color:dodgerblue;">Add Folder</div>`);
+    let addFlashCard = $(`<div style="color:dodgerblue;">Add FlashCard</div>`);
+    itemsArea.append(addFolder,addFlashCard);
+    const folderManager = new FolderManager.manager({host:itemsArea});
+    folderManager.on("select",async(item)=>{
       let content = false;
       try {
-        content = await APIService.getItemContent({itemId:item.item_id});
+        content = await APIService.getSpaceItemChilds({spaceId:item.space_id,itemId:item.item_id});
       } catch (e) {
         console.log(e);
         content = false;
       }
+      console.log({content});
       if(content){
-        if(item.type==="flashcard"){
-          let flashCardView = new FlashCardView.Board({host:boardArea,data:item,cards:content.cards});
+        if(item.item_type==="flashcard"){
+          boardArea.empty();
+          let flashCardView = new FlashCardView.Board({host:boardArea,data:item,cards:content.items});
+        }else if (item.item_type==="folder") {
+          let items = content.items;
+          for(let i =0; i< items.length; i++){
+            folderManager.addItem({parentId:items[i].parent_id,item:items[i]});
+          }
         }
       }
-      console.log(content);
+    });
+    APIService.getSpaceItems({
+      spaceId:spaceId
+    }).then((res)=>{
+      let items = res.items;
+      for (let i =0; i< items.length; i++){
+        folderManager.addItem({item:items[i]});
+      }
+      console.log("get items",res);
+    }).catch((e)=>{
+      console.log(e);
+    });
 
-      // console.log("item",item);
-      //FlashCardView = new FlashCardView.Board({host:});
-    }
-    let addFolder = $(`<div style="color:dodgerblue;">Add Folder</div>`);
-    let addFlashCard = $(`<div style="color:dodgerblue;">Add FlashCard</div>`);
-    itemsArea.append(addFolder,addFlashCard);
+
     addFolder.click((e)=>{
       let name = prompt("name?");
       if(name.length>=0){
-        APIService.createFolder({
-          inFolderId:false,
-          folderName:name,
-          spaceId:spaceId
+        APIService.createSpaceItem({
+          spaceId:spaceId,
+          parentId:`af085337-8af8-454d-bd56-53c8d2339e3b`,
+          folder:{
+            item_name:name
+          }
+          // flashcard:{
+          //   item_name:name
+          // },
+          // flashcardCard:{
+          //   item_name:name,
+          //   card_type:"basic",
+          //   text:`Hello world`
+          // }
         }).then((res)=>{
           console.log("ADDED SPACE ITEMS",res);
         }).catch((e)=>{
@@ -192,10 +254,12 @@ class SpacePage extends Navigation.Page {
     addFlashCard.click((e)=>{
       let name = prompt("name?");
       if(name.length>=0){
-        APIService.createFlashcard({
-          inFolderId:false,
-          cardName:name,
-          spaceId:spaceId
+        APIService.createSpaceItem({
+          spaceId:spaceId,
+          parentId:false,
+          flashcard:{
+            item_name:name
+          },
         }).then((res)=>{
           console.log("ADDED SPACE ITEMS",res);
         }).catch((e)=>{
@@ -203,53 +267,12 @@ class SpacePage extends Navigation.Page {
         });
       }
     });
-    APIService.getSpaceItems({
-      spaceId:spaceId
-    }).then((res)=>{
-      let items = res.items;
-      for (let i =0; i< items.length; i++){
-        let controller = false;
-        if(items[i].type==="folder"){
-          controller = new SpaceFolder({host:itemsArea,data:items[i]});
-        }else if (items[i].type==="flashcard") {
-          controller = new FlashCard({host:itemsArea,data:items[i]});
-        }
-        if(controller){
-          controller.on("select",(data)=>{
-            showBoard(data);
-          });
-        }
-      }
-      console.log("get items",res);
-    }).catch((e)=>{
-      console.log(e);
-    });
-    // APIService.getSpaces().then((spaces)=>{
-    //     console.log({spaces});
-    //
-    // }).catch((error)=>{
-    //     console.log(error);
-    // });
-    // APIService.createFolder({
-    //   inFolderId:false,
-    //   folderName:"Python",
-    //   spaceId:spaceId
-    // }).then((res)=>{
-    //   console.log("ADDED SPACE ITEMS",res);
-    // }).catch((e)=>{
-    //   console.log(e);
-    // });
-    // APIService.createFlashcard({
-    //   inFolderId:false,
-    //   cardName:"learn react",
-    //   spaceId:spaceId
-    // }).then((res)=>{
-    //   console.log("ADDED SPACE ITEMS",res);
-    // }).catch((e)=>{
-    //   console.log(e);
-    // });
   }
 }
+
+
+
+
 class CardPage extends Navigation.Page {
   constructor(args) {
     super(args);

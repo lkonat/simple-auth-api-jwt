@@ -91,6 +91,7 @@ class SqliteAwaWrapper{
         database
       });
       if(outcome.err){
+        console.log(outcome.err );
         throw Error (`cannot create database ${path}`);
         return resolve({ err: outcome.err });
       } else {
