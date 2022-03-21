@@ -111,6 +111,11 @@ class SqliteAwaWrapper{
       if(outcome.error){
         return reject(outcome.error);
       }
+      try {
+        let foreignKey =  await controller.execute({query:`PRAGMA foreign_keys = ON`});
+      } catch (e) {
+        return reject(e.toString());
+      }
       return resolve(controller);
     });
   }

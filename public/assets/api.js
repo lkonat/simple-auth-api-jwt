@@ -209,13 +209,14 @@
          });
        });
      },
-     getFlashcardCards: ({flashcardId}) => {
+     getFlashcardCards: ({spaceId,itemId}) => {
         return new Promise(function (resolve, reject) {
           $.ajax({
-            type: "GET",
-            url: `${hostName}/api/app/flashcard/${flashcardId}`,
+            type: "POST",
+            url: `${hostName}/api/app/flashcard/cards`,
             contentType: "application/json",
-            headers:{"x-auth-token":SELF.TOKEN}
+            headers:{"x-auth-token":SELF.TOKEN},
+            data: JSON.stringify({spaceId,itemId})
           }).done((res) => {
               return resolve(res);
           }).fail((err) => {
@@ -281,6 +282,21 @@
               });
             });
           },
+          deleteItem: ({spaceId,itemId}) => {
+             return new Promise(function (resolve, reject) {
+               $.ajax({
+                 type: "DELETE",
+                 url: `${hostName}/api/app/space/item`,
+                 contentType: "application/json",
+                 headers:{"x-auth-token":SELF.TOKEN},
+                 data: JSON.stringify({spaceId,itemId})
+               }).done((res) => {
+                   return resolve(res);
+               }).fail((err) => {
+                   return reject(err);
+               });
+             });
+           },
        createSpaceItem: ({spaceId,parentId,folder,flashcard,flashcardCard}) => {
           return new Promise(function (resolve, reject) {
             $.ajax({
@@ -311,14 +327,14 @@
              });
            });
          },
-         getSpaceItemChilds: ({spaceId,itemId}) => {
+         getSpaceItemChilds: ({spaceId,itemId,orderBy}) => {
             return new Promise(function (resolve, reject) {
               $.ajax({
                 type: "POST",
                 url: `${hostName}/api/app/space/item/childs`,
                 contentType: "application/json",
                 headers:{"x-auth-token":SELF.TOKEN},
-                data: JSON.stringify({spaceId,itemId})
+                data: JSON.stringify({spaceId,itemId,orderBy})
               }).done((res) => {
                   return resolve(res);
               }).fail((err) => {
@@ -360,4 +376,5 @@
   exports.getSpaceItemChilds = SELF.getSpaceItemChilds;
   exports.createSpaceItem = SELF.createSpaceItem;
   exports.updateItem = SELF.updateItem;
+  exports.deleteItem = SELF.deleteItem;
 })(typeof exports === "undefined" ? (this.APIService = {}) : exports);

@@ -29,6 +29,12 @@
         }).catch((err)=>{
           return reject(err);
         });
+
+        // APIService.deleteItem({spaceId,itemId}).then((res)=>{
+        //   return resolve(res);
+        // }).catch((err)=>{
+        //   return reject(err);
+        // });
       });
     }
     render(){
@@ -40,7 +46,7 @@
         this.menuView.appendChild(saveBtn);
         this.titleInput = document.createElement("input");
         this.titleInput.setAttribute("type","text");
-        this.titleInput.setAttribute("value",this.data.title);
+        this.titleInput.setAttribute("value",this.data.item_name);
         this.titleInput.style =`width:100%;`;
         this.textareaInput = document.createElement("textarea");
         this.textareaInput.setAttribute("value",this.data.text);
@@ -58,9 +64,7 @@
           let changes  = {
             item_name:title,
             title,
-            text,
-            score:0,
-            pos:11
+            text
           };
           console.log(this.data,changes);
         try {
@@ -82,9 +86,9 @@
         editBtn.innerHTML ="Edit";
         this.menuView.appendChild(editBtn);
         this.frontview = document.createElement(`div`);
-        this.frontview.innerHTML = `${this.data.title}`
+        this.frontview.innerHTML = `${this.data.item_name}`
         this.backView = document.createElement(`div`);
-        this.backView.innerHTML = `body ${this.data.text}`;
+        this.backView.innerHTML = this.data.text?this.data.text:"no text yet";
 
         let holder = document.createElement(`div`);
         holder.style=`width:100%; height:100%;dispay:grid; grid-template-rows:max-content max-content auto; grid-template-columns:auto;`;
@@ -224,7 +228,8 @@
       const spaceId = this.data.space_id;
       const menus =[{name:"add_new_card",label:"Add new card"}];
       const tools = new Tools({host:this.toolArea,menus:this.menus});
-      const cart = new Cart({host:this.bottomArea,cards:this.cards});
+      // const cart = new Cart({host:this.bottomArea,cards:this.cards});
+      const cart = new FlashcardRack.controller({host:this.displayArea,cards:this.cards});
       //const display = new Display({host:this.displayArea});
       cart.on("selection",(item)=>{
         console.log(item);

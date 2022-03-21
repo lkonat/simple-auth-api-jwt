@@ -441,13 +441,12 @@ class Controller extends DatabaseInterface {
         if(!transactions || transactions?.length<=0){
           return reject("could not build transaction");
         }
-        return resolve({transactions});
-        // try {
-        //   let res = await this.conn.transaction({transactions});
-        //   return resolve({changes});
-        // } catch (e) {
-        //   return reject(e);
-        // }
+        try {
+          let res = await this.conn.transaction({transactions});
+          return resolve({changes});
+        } catch (e) {
+          return reject(e);
+        }
       } catch (e) {
         return reject(e.toString());
       }
@@ -586,6 +585,32 @@ class Controller extends DatabaseInterface {
       }
     });
   }
+  _deleteItem({spaceId,itemId,userId}){
+    return new Promise(async(resolve, reject)=>{
+      try {
+        if(!userId){
+          return reject("user not authenticated");
+        }
+        if(!spaceId){
+          return reject("require space id");
+        }
+        if(!itemId){
+          return reject("require item id");
+        }
+        try {
+          let res = await this.conn.execute({
+            query:`DELETE FROM items WHERE item_id = ?`,
+            data:[itemId]
+          });
+          return resolve(res);
+        } catch (e) {
+          return reject(e);
+        }
+      } catch (e) {
+        return reject(e.toString());
+      }
+    });
+  }
   _getSpaceItems({spaceId,userId}){
     return new Promise(async(resolve, reject)=>{
       try {
@@ -635,22 +660,24 @@ class Controller extends DatabaseInterface {
       }
     });
   }
-
-  _getFlashcardCards({flashcardId,userId}){
+  _getFlashcardCards({spaceId,itemId,userId}){
     return new Promise(async(resolve, reject)=>{
       try {
-        if(!userId){
-          return reject("user not authenticated");
+        if(!itemId){
+          return reject("require item id");
         }
-        if(!flashcardId){
-          return reject("require flashcard id");
+        if(!spaceId){
+          return reject("require space id");
+        }
+        if(!userId){
+          return reject("require user id");
         }
         try {
           let rows = await this.conn.findAll({
-            query:`SELECT * FROM cards WHERE flashcard_id=? ORDER BY pos ASC`,
-            data:[flashcardId]
+            query:`SELECT * FROM items AS I JOIN flashcard_cards AS C ON I.item_id =C.item_id WHERE parent_id=? ORDER BY C.pos ASC`,
+            data:[itemId]
           });
-          return resolve({cards:rows});
+          return resolve({items:rows});
         } catch (e) {
           return reject(e.toString());
         }
@@ -659,6 +686,7 @@ class Controller extends DatabaseInterface {
       }
     });
   }
+
   // _getFolderItems({folderId,userId}){
   //   return new Promise(async(resolve, reject)=>{
   //     try {

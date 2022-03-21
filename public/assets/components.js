@@ -194,23 +194,32 @@ class SpacePage extends Navigation.Page {
     itemsArea.append(addFolder,addFlashCard);
     const folderManager = new FolderManager.manager({host:itemsArea});
     folderManager.on("select",async(item)=>{
-      let content = false;
-      try {
-        content = await APIService.getSpaceItemChilds({spaceId:item.space_id,itemId:item.item_id});
-      } catch (e) {
-        console.log(e);
-        content = false;
-      }
-      console.log({content});
-      if(content){
-        if(item.item_type==="flashcard"){
-          boardArea.empty();
-          let flashCardView = new FlashCardView.Board({host:boardArea,data:item,cards:content.items});
-        }else if (item.item_type==="folder") {
+      if(item.item_type==="flashcard"){
+        boardArea.empty();
+        try {
+          let content = await APIService.getFlashcardCards({spaceId:item.space_id,itemId:item.item_id});
           let items = content.items;
-          for(let i =0; i< items.length; i++){
-            folderManager.addItem({parentId:items[i].parent_id,item:items[i]});
+          if(items){
+            let flashCardView = new FlashCardView.Board({host:boardArea,data:item,cards:content.items});
+          }else {
+            throw new Error("could not get items");
           }
+        } catch (e) {
+          console.log(e);
+        }
+      }else if (item.item_type==="folder") {
+        try {
+          let content = await APIService.getSpaceItemChilds({spaceId:item.space_id,itemId:item.item_id});
+          let items = content.items;
+          if(items){
+            for(let i =0; i< items.length; i++){
+              folderManager.addItem({parentId:items[i].parent_id,item:items[i]});
+            }
+          }else{
+            throw new Error("could not get items");
+          }
+        } catch (e) {
+          console.log(e);
         }
       }
     });

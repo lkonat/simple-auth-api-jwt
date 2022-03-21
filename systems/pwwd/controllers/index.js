@@ -60,9 +60,9 @@ function addCardToFlashcard(req,res){
   });
 }
 function getFlashcardCards(req,res){
-  const {id} = req.params;
+  const {spaceId,itemId} = req.body;
   const userId = req?.auth?.id;
-  Model.getFlashcardCards({flashcardId:id,userId}).then((success)=>{
+  Model.getFlashcardCards({spaceId,itemId,userId}).then((success)=>{
     res.json(success);
   }).catch((err)=>{
     res.status(400).json({error:err});
@@ -149,6 +149,19 @@ function updateItem(req,res){
   });
 }
 
+function deleteItem(req,res){
+  const {spaceId,itemId} = req.body;
+  const userId = req?.auth?.id;
+  if(!userId){
+    return res.status(400).json({error:'user id is missing'});
+  }
+  Model.deleteItem({spaceId,itemId,userId}).then((success)=>{
+    res.json(success);
+  }).catch((err)=>{
+    res.status(400).json({error:err});
+  });
+}
+exports.deleteItem = deleteItem;
 exports.updateItem = updateItem;
 exports.getSpaceItemChids= getSpaceItemChids;
 exports.getSpaceItem= getSpaceItem;

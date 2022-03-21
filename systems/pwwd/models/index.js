@@ -151,7 +151,18 @@ function updateItem(args){
     }
   });
 }
+function deleteItem(args){
+  return new Promise(async(resolve, reject)=>{
+    try {
+      let outcome = await Controller._deleteItem(args);
+      return resolve(outcome);
+    } catch (e) {
+      return reject(e);
+    }
+  });
+}
 
+exports.deleteItem = deleteItem;
 exports.updateItem = updateItem;
 exports.getSpaceItem = getSpaceItem;
 exports.getSpaceItemChids = getSpaceItemChids;

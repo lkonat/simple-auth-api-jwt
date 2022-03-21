@@ -15,7 +15,8 @@ const {
 
 getSpaceItem,
 getSpaceItemChids,
-updateItem
+updateItem,
+deleteItem
 } = require("../controllers");
 const {ensureAuth,ensureAdmin} = require("../controllers/auth");
 const {body} = require('express-validator');
@@ -36,4 +37,6 @@ router.post('/space/item',ensureAuth,createSpaceItem);
 router.post('/space/item/childs',ensureAuth,getSpaceItemChids);
 router.post('/space/item/info',ensureAuth,getSpaceItem);
 router.put('/space/item',ensureAuth,updateItem);
+router.delete('/space/item',ensureAuth,deleteItem);
+router.post('/flashcard/cards',ensureAuth,getFlashcardCards);
 module.exports = router;
