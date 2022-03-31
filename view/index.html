@@ -4,70 +4,76 @@
     <meta charset="utf-8">
     <title></title>
   </head>
+  <style media="screen">
+    .selected{
+      fill:dodgerblue !important;
+    }
+    svg {
+  transition: transform 0.1s linear 0.1s;
+}
+  </style>
   <body>
     <script src="https://code.jquery.com/jquery-2.0.2.min.js"> </script>
-    <script src="components.js"> </script>
-    <script src="../services/api.js"> </script>
+    <!-- <script src="AwaTree.js" charset="utf-8"></script> -->
+      <script src="Roadmap.js" charset="utf-8"></script>
     <script type="text/javascript">
-      let container = $(`<div></div>`);
-      $("body").append(container);
-      const loginView =  new LoginView({host:container});
 
-      loginView.on("submit",(args)=>{
-        APIService.login({
-          email:args.email,
-          password:args.password
-        }).then((success)=>{
-            console.log(success);
-            if(success.user){
-              APIService.setUser(success.user);
-            }
-            // APIService.testAuth().then((success)=>{
-            //     console.log(success,"granted access");
-            // }).catch((error)=>{
-            //     console.log(error);
-            // });
-        }).catch((error)=>{
-            console.log(error);
-        });
-      });
-
-
-
-      // APIService.signup({
-      //   name:"lkonat",
-      //   email:'konate011@gmail.com',
-      //   password:"1234567",
-      //   password2:"1234567"
-      // }).then((success)=>{
-      //     console.log(success);
-      // }).catch((error)=>{
-      //     console.log(error);
-      // });
-console.log("USER: ",APIService.getUser());
-      // APIService.testAuth().then((success)=>{
-      //     console.log(success,"granted access");
-      // }).catch((error)=>{
-      //     console.log(error);
-      // });
-
-      // APIService.createSpace({spaceName:"Python"}).then((success)=>{
-      //     console.log(success,"createSpace");
-      // }).catch((error)=>{
-      //     console.log(error,"createSpace");
-      // });
-      // APIService.createSpace({spaceName:"Node"}).then((success)=>{
-      //     console.log(success,"createSpace");
-      // }).catch((error)=>{
-      //     console.log(error,"createSpace");
-      // });
+    //
+    // const controller  = new Mind.map({host:$("body")});
+    // controller.render();
+    // // let circle = new Circle({x:75,y:75,r:10,style:'fill: transparent; stroke: blue; stroke-width: 1px;'});
+    // // controller.addItem(circle);
+    // // controller.on("click",(e)=>{
+    // //   const {offsetX,offsetY} = e;
+    // //   console.log("clicked svg",offsetX,offsetY);
+    // //   let circle = new Circle({x:offsetX,y:offsetY,r:10,style:'fill: transparent; stroke: blue; stroke-width: 1px;'});
+    // //   controller.addItem(circle);
+    // // });
+    // controller.tree({
+    //   data:[
+    //     {id:1,name:"1"},
+    //     {id:2,name:"2",parentId:1},
+    //     {id:3,name:"3",parentId:1},
+    //     {id:4,name:"4",parentId:1},
+    //
+    //     {id:5,name:"5",parentId:3},
+    //     {id:6,name:"6",parentId:3},
+    //     {id:7,name:"7",parentId:3},
+    //
+    //     {id:8,name:"8",parentId:4},
+    //     {id:9,name:"9",parentId:4},
+    //     {id:10,name:"10",parentId:4},
+    //     {id:11,name:"11",parentId:4},
+    //
+    //
+    //     {id:12,name:"12",parentId:7},
+    //
+    //     {id:13,name:"13",parentId:1},
+    //     {id:14,name:"14",parentId:1},
+    //     {id:15,name:"15",parentId:1},
+    //   ]
+    // });
 
 
-      APIService.getSpaces().then((success)=>{
-          console.log(success,"getSpaces");
-      }).catch((error)=>{
-          console.log(error);
-      });
+   const controler = new Roadmap.controller({host:$(`body`),startDate:"2022-01-01", endDate:"2022-12-31"});
+
+   controler.addItems({
+     section:"Learning",
+     items:[
+       {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
+       {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
+       {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`}
+     ]
+   });
+   controler.addItems({
+     section:"Work",
+     items:[
+       {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
+       {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
+       {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+       {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
+     ]
+   });
     </script>
   </body>
 </html>

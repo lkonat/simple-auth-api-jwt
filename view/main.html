@@ -5,56 +5,149 @@
     <title></title>
   </head>
   <body>
-    <script src="https://code.jquery.com/jquery-2.0.2.min.js"> </script>
-    <script src="components.js"> </script>
-    <script src="../services/api.js"> </script>
-    <script type="text/javascript">
-      let page = $(`<div style="width:100%; height:100%; display:grid; grid-template-rows:max-content auto; grid-template-columns:auto; grid-row-gap:10px;"></div>`);
-      $("body").append(page);
-      let routeLinkArea = $(`<div style="width:100%;display:flex; flex-direction:row; gap:5px; align-items:center;border-bottom:1px solid var(--dark-border);margin:0px;"></div>`);
-      let routerBodyARea= $(`<div style="width:100%;overflow:scroll;"></div>`);
-      page.append(routeLinkArea,routerBodyARea);
 
-      let links = {};
-      const highlightLink = ({label})=>{
-        for(let l in links){
-          if(label ===l){
-            links[l].btn.css({"color":"dodgerblue","cursor":"default"});
-          }else{
-            links[l].btn.css({"color":"inherit","cursor":"pointer"});
-          }
+    <svg style="width:100%; height:500px; border:1px solid red;">
+      <g class="main-container" transform="matrix(1 0 0 1 0 0)">
+        <circle class="draggable" cx="50" cy="50" r="50"/>
+          <circle class="draggable" cx="250" cy="50" r="50"/>
+
+            <g class="draggable">
+                <circle cx="350" cy="50" r="50"/>
+            </g>
+      </g>
+    </svg>
+    <script type="text/javascript">
+    const maxScale = 5,
+            minScale = 0.15;
+
+        var selected,
+            scale = 1,
+            svg = document.querySelector('svg');
+let transform = false;
+        function beginDrag(e) {
+            e.stopPropagation();
+            let target = e.target;
+            transform = false;
+            if (target.classList.contains('draggable')) {
+                selected = target;
+            } else {
+                selected = document.querySelector('.main-container');
+            }
+
+            selected.dataset.startMouseX = e.clientX;
+            selected.dataset.startMouseY = e.clientY;
         }
-      };
-      const addLink=({label,link})=>{
-        let btn = $(`<a href="${link}" style="cursor:pointer; background-color:inherit; border:none;color:var(--dark-text-color);border-bottom:2px; solid inherit;outline:none;font-size:1.3em;margin:0px; text-decoration:none;padding:3px;" target="_blank">${label}</a>`);
-        routeLinkArea.append(btn);
-        links[label] = {btn};
-        btn.click((e)=>{
-          if(!e.metaKey){
+
+        function drag(e) {
+            if (!selected) return;
+            e.stopPropagation();
+
+            let startX = parseFloat(selected.dataset.startMouseX),
+                startY = parseFloat(selected.dataset.startMouseY),
+                dx = (e.clientX - startX),
+                dy = (e.clientY - startY);
+
+            if (selected.classList.contains('draggable')) {
+                let selectedBox = selected.getBoundingClientRect(),
+                    boundaryBox = selected.parentElement.getBoundingClientRect();
+
+                // if (selectedBox.right + dx > boundaryBox.right) {
+                //     dx = (boundaryBox.right - selectedBox.right);
+                // } else if (selectedBox.left + dx < boundaryBox.left) {
+                //     dx = (boundaryBox.left - selectedBox.left);
+                // }
+                //
+                // if (selectedBox.bottom + dy > boundaryBox.bottom) {
+                //     dy = (boundaryBox.bottom - selectedBox.bottom);
+                // }
+                // else if (selectedBox.top + dy < boundaryBox.top) {
+                //     dy = (boundaryBox.top - selectedBox.top);
+                // }
+                let transforms = selected.transform.baseVal;
+                // Ensure the first transform is a translate transform
+                if (transforms.length === 0 || transforms.getItem(0).type !== SVGTransform.SVG_TRANSFORM_TRANSLATE) {
+                  // Create an transform that translates by (0, 0)
+                  var translate = svg.createSVGTransform();
+                  translate.setTranslate(dx, dy);
+                  // Add the translation to the front of the transforms list
+                  selected.transform.baseVal.insertItemBefore(translate, 0);
+                }
+
+                // Get initial translation amount
+                console.log(e.clientX)
+                let currentMatrix = selected.transform.baseVal.consolidate().matrix;
+                let newMatrix = currentMatrix.translate(dx /scale, dy /scale);
+                let transform = svg.createSVGTransformFromMatrix(newMatrix);
+
+                // selected.transform.baseVal.initialize(transform);
+                selected.dataset.startMouseX = (dx + startX);
+                selected.dataset.startMouseY = (dy + startY);
+            }else{
+              let currentMatrix = selected.transform.baseVal.consolidate().matrix,
+                  newMatrix = currentMatrix.translate(dx / scale, dy / scale),
+                  transform = svg.createSVGTransformFromMatrix(newMatrix);
+                              console.log(currentMatrix,transform)
+
+              selected.transform.baseVal.initialize(transform);
+              selected.dataset.startMouseX = dx + startX;
+              selected.dataset.startMouseY = dy + startY;
+            }
+        }
+
+        function endDrag(e) {
+            e.stopPropagation();
+
+            if (selected) {
+                selected = undefined;
+            }
+        }
+
+
+        function zoom(e) {
             e.stopPropagation();
             e.preventDefault();
-            return router.render(link);
-          }
-        });
-        return btn;
-      };
-      const router = new Router({host:routerBodyARea});
-      let assignmentLink = addLink({label:"My Assignments",link:`/dashboard/task/assignments/${AppUser}?status=0`});
-      // let onHoldTask = addLink({label:"Snooze",link:`/dashboard/task/snoozed/${AppUser}`});
-      // let taskLink = addLink({label:"Tasks",link:"/dashboard/task"});
-      router.addRoute("/space",{highlightLink:false,exact:true,component:new SpacePage({name:"space",router,type:"assignments"})});
-      // router.addRoute("/dashboard/task/snoozed/:userId",{highlightLink:onHoldTask,exact:true,component:new UserTasks({name:"snoozed",router,type:"snoozed"})});
-      // router.addRoute("/dashboard/task",{highlightLink:taskLink,exact:true,component:new UserTasks({name:"all-tasks",router,type:"all"})});
-      // // router.addRoute("/dashboard/tasks/:id/test/:current",{component:new RouterComponent({name:"test",router}),exact:true});
-      // // router.addRoute("/dashboard/tasks/narrative",{component:new RouterComponent({name:"narrative-tasks",router}),exact:true});
-      // router.addRoute("/dashboard/task/task/:id",{highlightLink:taskLink,component:new TaskView({name:"/dashboard/task/:id",router}),exact:true});
-      // router.addRoute("/dashboard/task/new",{highlightLink:taskLink,exact:true,component:new NewTaskView({name:"create-new",router,type:"create-new-task"})});
-      // router.addRoute("/dashboard/task/new/choose",{highlightLink:taskLink,exact:true,component:new TaskTemplateView({name:"create-new-choose",router,type:"create-new-task-choose"})});
-      // router.error(404,{component:new View404({name:"/dashboard/task/:id",router})});
-      router.render("/space");
-      window.addEventListener("popstate",(state)=>{
-        router.render();
-      });
+
+            let delta = e.wheelDelta,
+                container = document.querySelector('svg .main-container'),
+                scaleStep = delta > 0 ? 1.25 : 0.8;
+
+            if (scale * scaleStep > maxScale) {
+                scaleStep = maxScale / scale;
+            }
+
+            if (scale * scaleStep < minScale) {
+                scaleStep = minScale / scale;
+            }
+
+            scale *= scaleStep;
+
+            let box = svg.getBoundingClientRect();
+            let point = svg.createSVGPoint();
+            point.x = e.clientX - box.left;
+            point.y = e.clientY - box.top;
+
+            let currentZoomMatrix = container.getCTM();
+
+            point = point.matrixTransform(currentZoomMatrix.inverse());
+
+            let matrix = svg.createSVGMatrix()
+                .translate(point.x, point.y)
+                .scale(scaleStep)
+                .translate(-point.x, -point.y);
+
+
+            let newZoomMatrix = currentZoomMatrix.multiply(matrix);
+            container.transform.baseVal.initialize(svg.createSVGTransformFromMatrix(newZoomMatrix));
+
+            console.log("scale", scale);
+            let t = newZoomMatrix;
+            console.log("zoomMatrix", t.a, t.b, t.c, t.d, t.e, t.f);
+        }
+
+        document.querySelector('svg').addEventListener('mousedown', beginDrag);
+        document.querySelector('svg').addEventListener('mousewheel', zoom);
+        svg.addEventListener('mousemove', drag);
+        window.addEventListener('mouseup', endDrag);
     </script>
   </body>
 </html>
