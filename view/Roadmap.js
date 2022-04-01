@@ -1,7 +1,9 @@
 ((exports)=>{
   class RoadMapItems {
-    constructor({viewId,roadmapStartDate,roadmapEndDate,startDate,endDate,label,oneDayPx,unitHeight}) {
+    constructor({viewId,roadmapStartDate,roadmapEndDate,startDate,endDate,label,oneDayPx,unitHeight,section,color}) {
+      this.section = section;
       this.viewId = viewId;
+      this.color = color;
       this.roadmapStartDate = roadmapStartDate;
       this.roadmapEndDate = roadmapEndDate;
       this.startDate = startDate;
@@ -10,16 +12,18 @@
       this.oneDayPx = oneDayPx;
       this.unitHeight = unitHeight;
     }
-    getNumdays(args){
+    getSection(){
+      return this.section;
+    }
+    getNumdays(){
       let roadMapStartTs = new Date(this.roadmapStartDate).getTime();
       return {
         start:((new Date(this.startDate).getTime()-roadMapStartTs)/(1000*60*60*24)),
         end:((new Date(this.endDate).getTime()-roadMapStartTs)/(1000*60*60*24)),
       }
     }
-    updateMetrics(){
-      function dateStr(ts){
-        let date = new Date(ts);
+    updateMetrics({left,width}){
+      function dateStr(date){
         let year = date.getFullYear();
         let month = date.getMonth()+1;
         let day = date.getDate();
@@ -28,19 +32,18 @@
         let str = `${year}-${month}-${day}`;
         return str;
       }
-      let left = parseInt(this.view.css("left"));
-      let width = parseInt(this.view.css("width"));
-      let roadMapStartTs = new Date(this.roadmapStartDate).getTime();
-      let startNDayTs = (Math.ceil(left/this.oneDayPx)*(1000*60*60*24)) + roadMapStartTs;
-      let endNDayTs = (Math.ceil((left+width)/this.oneDayPx)*(1000*60*60*24)) + roadMapStartTs;
-
-      let startDay = new Date(startNDayTs);
-      let endDay = new Date(endNDayTs);
-      let starDate = dateStr(startNDayTs);
-      let endDate = dateStr(endNDayTs);
-      console.log({starDate,endDate});
-      // console.log({startDay:startDay.toString(),endDay:endDay.toString(),last:(left+width)/this.oneDayPx,lastCel:Math.ceil(left+width)/this.oneDayPx});
-
+      let newStartNday = Math.ceil(left/this.oneDayPx);
+      let newEndNday = Math.ceil((left+width)/this.oneDayPx);
+      let roadMapStartDate = new Date(this.roadmapStartDate);
+      let startDate1 = new Date(this.roadmapStartDate);
+      let startDate2 = new Date(this.roadmapStartDate);
+      let starDateX = startDate1.setDate(startDate1.getDate()+newStartNday+1);
+      let endDateX = startDate2.setDate(startDate2.getDate()+newEndNday+1);
+      let A = dateStr(startDate1);
+      let B = dateStr(startDate2);
+      this.startDate = A;
+      this.endDate = B;
+      console.log("UPDATED ",this.startDate,A,this.endDate,B);
     }
     display({host,top}){
       if(this.view){
@@ -50,9 +53,10 @@
       let startNDay = numDays.start;
       let endNDay = numDays.end;
       let width = (endNDay - startNDay)*this.oneDayPx;
-      this.view = $(`<div class="map-items" data-id="${this.viewId}" style="position:absolute; top:${top}px; left:${startNDay*this.oneDayPx}px; width:${width}px; height:${this.unitHeight}px; border:1px solid dodgerblue; background-color:whitesmoke; color:black; text-align:center; border-radius:3px;cursor:pointer;overflow:hidden;">${this.label}</div>`);
-      this.left = $(`<div class="stretchable stretchable-w" style="width:10px;height:100%; background-color:dodgerblue; position:absolute; top:0px; left:0px; cursor:w-resize;"></div>`);
-      this.right = $(`<div class="stretchable stretchable-e" style="width:10px; height:100%; background-color:dodgerblue;position:absolute; top:0px; right:0px;cursor:e-resize;"></div>`);
+      let str = `${this.startDate} to ${this.endDate}`;
+      this.view = $(`<div class="map-items" title="${str}" data-id="${this.viewId}" style="position:absolute; top:${top}px; left:${startNDay*this.oneDayPx}px; width:${width}px; height:${this.unitHeight}px; border:1px solid lightgrey; background-color:whitesmoke; color:black; text-align:center; cursor:pointer;overflow:hidden;margin:0px;">${this.label}</div>`);
+      this.left = $(`<div class="stretchable stretchable-w" style="width:10px;height:100%; background-color:transparent; position:absolute; top:0px; left:0px; cursor:w-resize;margin:0px;"></div>`);
+      this.right = $(`<div class="stretchable stretchable-e" style="width:10px; height:100%; background-color:transparent;position:absolute; top:0px; right:0px;cursor:e-resize;margin:0px;"></div>`);
       this.view.append(this.left,this.right);
       host.append(this.view);
     }
@@ -65,50 +69,64 @@
      this.roadmapEndDate = roadmapEndDate;
      this.unitHeight = unitHeight;
      this.oneDayPx = oneDayPx;
-     this.box = $(`<div style="outline:1px solid whitesmoke;border-radius:5px;width:100%; -webkit-user-select: none; -ms-user-select: none;user-select: none; margin:0px;padding:0px;"></div>`);
-     this.header = $(`<div>${this.name}</div>`);
+     this.box = $(`<div style=" margin:0px;border-radius:5px;width:100%; -webkit-user-select: none; -ms-user-select: none;user-select: none; padding:0px;"></div>`);
+     this.header = $(`<div style="paddin-left:3px;"><h3>${this.name}</h3></div>`);
      this.container = $(`<div style="min-height:30px; width:100%; position:relative;-webkit-user-select: none; -ms-user-select: none;user-select: none;margin:0px;padding:0px;"></div>`);
      this.box.append(this.header,this.container);
      this.host.append(this.box);
      this.lines =[];
+     this.items = [];
+   }
+   refresh(){
+     this.placeAllItems();
+   }
+   placeAllItems(){
+     this.lines =[];
+     for(let i =0; i<this.items.length; i++){
+       this.placeOneItem({item:this.items[i]});
+     }
      this.render();
    }
-   addItems({items}){
-     const addOne=({item})=>{
-       const findAvailableRow = ({startNDay,endNDay})=>{
-         for(let i =0; i< this.lines.length; i++){
-           let rowItems = this.lines[i];
+   placeOneItem({item}){
+     const findAvailableRow = ({startNDay,endNDay,label})=>{
+       for(let i =0; i< this.lines.length; i++){
+         let rowItems = this.lines[i];
+         let here = (()=>{
            for(let j =0; j<rowItems.length; j++){
              let item = rowItems[j];
              let numDays = item.getNumdays();
              let itemStartNDay = numDays.start;
              let itemEndNDay = numDays.end;
-             if((startNDay>=itemStartNDay && startNDay<=itemEndNDay)  || (endNDay>=itemStartNDay && endNDay<=itemEndNDay)){
-               continue
-             }else{
-               return i;
+             if((startNDay>=itemStartNDay && startNDay<=itemEndNDay)  || (endNDay>=itemStartNDay && endNDay<=itemEndNDay)  || (itemStartNDay>=startNDay && itemStartNDay<=endNDay) || (itemEndNDay>=startNDay && itemEndNDay<=endNDay) ){
+               return false;
              }
            }
+           return true;
+         })();
+         if(here){
+           return i;
          }
-         return null;
-       };
-
-       let numDays = item.getNumdays();
-       let startNDay = numDays.start;
-       let endNDay = numDays.end;
-       let availableRow = findAvailableRow({startNDay,endNDay});
-       if( availableRow !== null && availableRow>=0){
-         this.lines[availableRow].push(item);
-       }else{
-         this.lines.push([item]);
        }
-     }
+       return null;
+     };
 
-     items = Array.isArray(items)?items:[items];
-     for(let i =0; i<items.length; i++){
-       addOne({item:items[i]});
+     let numDays = item.getNumdays();
+     let startNDay = numDays.start;
+     let endNDay = numDays.end;
+     let availableRow = findAvailableRow({startNDay,endNDay,label:item.label});
+     if( availableRow !== null && availableRow>=0){
+       this.lines[availableRow].push(item);
+     }else{
+       this.lines.push([item]);
      }
-     this.render();
+   }
+   addItems({items}){
+     if( Array.isArray(items)){
+       this.items = this.items.concat(items);
+     }else{
+       this.items.push(items);
+     }
+     this.placeAllItems();
    }
    render(){
      this.container.empty();
@@ -122,7 +140,6 @@
        top+=this.unitHeight+5;
        this.container.css({height:top+this.unitHeight+10});
      }
-     console.log({lines:this.lines});
    }
  }
 
@@ -134,10 +151,13 @@
      this.oneDayPx = oneDayPx;
      this.host = host;
      this.svgns = "http://www.w3.org/2000/svg";
-     this.screen = $(`<svg style=" -webkit-user-select: none; -ms-user-select: none;user-select: none;pointer-events: none; padding:0px; width:100%; height:100%;background-color:${this.background?this.background:"transparent"}; position:absolute; top:0px; left:0px;" ></svg>`);
+     this.screen = $(`<svg style=" -webkit-user-select: none; -ms-user-select: none;user-select: none;pointer-events: none; margin:0px; padding:0px; width:100%; height:100%;background-color:${this.background?this.background:"transparent"}; position:absolute; top:0px; left:0px;" ></svg>`);
      this.host.append(this.screen);
      this.fontSize = 12;
 
+   }
+   clear(){
+       this.screen.empty();
    }
    drawTimeLine({label, x,color}){
      const lineHeight = parseInt(this.screen.css("height"));
@@ -154,12 +174,16 @@
      if(label){
         let labelText = label.text;
         let color = label.color;
+        let labelY = label.top?40:label.middle?lineHeight/2:label.bottom?lineHeight-10:40;
         let text = document.createElementNS(this.svgns,"text");
         item.appendChild(text);
-        text.textContent = "today";
-        text.setAttribute('x', x - 10);
-        text.setAttribute('y', lineHeight/2);//if middle
-        text.setAttribute('style', `fill:${color?color:"red"};  font-size:${this.fontSize}px;`);
+        text.textContent = labelText;
+        let distToEnd = Math.abs(x- this.screen.width());
+        let distToStart = Math.abs(0 -x);
+        let closeToStart = distToStart<distToEnd;
+        text.setAttribute('x',closeToStart?x+this.oneDayPx:x-text.getBBox().width);
+        text.setAttribute('y', labelY);
+        text.setAttribute('style', `fill:${color?color:"red"};  font-size:${this.fontSize}px;font-family: monospace, monospace;`);
      }
      return item;
    }
@@ -171,16 +195,21 @@
     showToday(){
       let roadMapStartTs = new Date(this.roadmapStartDate).getTime();
       let nDayPassed =((new Date().getTime()-roadMapStartTs)/(1000*60*60*24));
+      let x = (nDayPassed*this.oneDayPx);
       this.todayLine =  this.drawTimeLine({
-          label:{text:"today", color:"red", top:"middle", left:"middle"},
-          x:nDayPassed*this.oneDayPx,
-          fill:"rgba(225,100,100,0.2)"
+          label:{text:"Today", color:"red", top:"middle"},
+          x,
+          color:"rgba(200,100,100,0.2)"
       });
     }
   }
   class ScreenEventLayer extends SVGScreenLayers{
     constructor(args) {
       super(args);
+    }
+    drawTimeLine(args){
+      this.clear();
+      super.drawTimeLine(args);
     }
   }
   class MeterView {
@@ -197,8 +226,8 @@
       this.oneDayPx = oneDayPx;
       this.background = "lightgrey";
       this.labelColor = "grey";
-      this.box = $(`<div style="padding:0px; position:relative; width:${this.width}px; height:${this.height}px; background-color:${this.background}; color:${this.labelColor};"></div>`);
-      this.screen = $(`<svg style=" -webkit-user-select: none; -ms-user-select: none;user-select: none;pointer-events: none; padding:0px; width:100%; height:100%;background-color:transparent; position:absolute; top:0px; left:0px;" ></svg>`);
+      this.box = $(`<div style="padding:0px; margin:0px;position:relative; width:${this.width}px; height:${this.height}px; background-color:${this.background}; color:${this.labelColor};"></div>`);
+      this.screen = $(`<svg style=" -webkit-user-select: none; -ms-user-select: none;user-select: none;pointer-events: none;margin:0px; padding:0px; width:100%; height:100%;background-color:transparent; position:absolute; top:0px; left:0px;" ></svg>`);
       this.box.append(this.screen);
       this.host.append(this.box);
       this.monthStr  =["","Jan","Feb","Mar", "Apr","May", "Jun", "Aug", "Jul", "Sep", "Oct", "Nov", "Dec"];
@@ -252,22 +281,44 @@
       this.roadmapStartDate =startDate;
       this.roadmapEndDate =endDate;
       this.unitHeight=25;
-      this.oneDayPx = 7;
+      this.oneDayPx = 10;
       this.host = host;
       this.sections = {};
       this.items = {};
       this.height = 500;
       this.roadmapWidth = (new Date(this.roadmapEndDate).getTime() - new Date(this.roadmapStartDate).getTime())/(1000*60*60*24)* this.oneDayPx;
-      console.log(this.roadmapWidth/this.oneDayPx)
+      console.log("width", this.roadmapWidth/this.oneDayPx)
       this.init();
+    }
+    convertToDate({start, width}){
+      function dateStr(ts){
+        let date = new Date(ts);
+        let year = date.getFullYear();
+        let month = date.getMonth()+1;
+        let day = date.getDate();
+        month = month>=10?month:`0${month}`;
+        day = day>=10?day:`0${day}`;
+        let str = `${year}-${month}-${day}`;
+        return str;
+      }
+      let left = start;
+      let roadMapStartTs = new Date(this.roadmapStartDate).getTime();
+      let startNDayTs = (Math.ceil(left/this.oneDayPx)*(1000*60*60*24)) + roadMapStartTs;
+      let endNDayTs = (Math.ceil((left+width)/this.oneDayPx)*(1000*60*60*24)) + roadMapStartTs;
+      let w = Math.ceil((endNDayTs -startNDayTs)/(1000*60*60*24));
+      let startDay = new Date(startNDayTs);
+      let endDay = new Date(endNDayTs);
+      let starDate = dateStr(startNDayTs);
+      let endDate = dateStr(endNDayTs);
+      return {starDate,endDate,str:`${starDate} to ${endDate} ${w} days`};
     }
     init(){
       this.mainContainer = $(`<div style="width:100%;"></div>`);
       this.host.append(this.mainContainer);
       this.topContainer = $(`<div style="width:100%;"></div>`);
-      this.scrollArea = $(`<div style="overflow:scroll; width:100%; border:1px solid blue; padding:3px; padding-bottom:50px;"></div>`);
-      this.renderArea = $(`<div style="padding:0px; position:relative; width:${this.roadmapWidth}px; border:1px solid red;"></div>`);
-      this.meterContainer = $(`<div style="padding:0px;width:100%;"></div>`);
+      this.scrollArea = $(`<div style="overflow:scroll; width:100%; border-bottom:1px solid whitesmoke; padding:3px; padding-bottom:10px;"></div>`);
+      this.renderArea = $(`<div style="padding:0px;margin:0; position:relative; width:${this.roadmapWidth}px;"></div>`);
+      this.meterContainer = $(`<div style="padding:0px;width:100%;margin:0;"></div>`);
       this.mapsContainer = $(`<div style="padding:0px;margin:0px;width:100%; height:300px; overflow:scroll;"></div>`);
       this.scrollArea.append(this.renderArea);
       this.renderArea.append(this.meterContainer,this.mapsContainer);
@@ -305,57 +356,100 @@
             let westDir = evt.target.classList.contains('stretchable-w');
             const {screenX,screenY} = evt;
             let view = $(evt.target).parent(".map-items");
+            $(".map-item-selected").removeClass("map-item-selected");
+            view.addClass("map-item-selected");
+            let width = view.width(), left = view[0].offsetLeft;
             dragElement = {
               type:"stretchable",
               view:view,
               target:evt.target,
-              startWidth:parseInt(view.css("width")),
-              startLeft:parseInt(view.css("left")),
+              startWidth:width,
+              startLeft:left,
               startX:screenX,
               startY:screenY,
+              left,
+              width,
               dir:estDir?"e":"w"
             };
           }else if (evt.target.classList.contains('map-items')) {
             const {screenX,screenY} = evt;
             let view = $(evt.target);
+            $(".map-item-selected").removeClass("map-item-selected");
+            view.addClass("map-item-selected");
+            let width = view.width(), left = view[0].offsetLeft;
             dragElement = {
               type:"movable",
               view:view,
-              startWidth:parseInt(view.css("width")),
-              startLeft:parseInt(view.css("left")),
+              startWidth:width,
+              startLeft:left,
               startX:screenX,
-              startY:screenY
+              startY:screenY,
+              left,
+              width
             };
           }
       }
       const drag =(evt)=>{
+        const {screenX,screenY} = evt;
         if(dragElement){
           evt.preventDefault();
+          let dist = screenX - dragElement.startX;
+          dragElement.distanceX =screenX - dragElement.startX;
+          dragElement.distanceX=Math.round(dragElement.distanceX/this.oneDayPx)*this.oneDayPx; //make it setp
           if(dragElement.type === "stretchable"){
-            const {screenX,screenY} = evt;
-            dragElement.distanceX =screenX - dragElement.startX;
             if(dragElement.dir === "e"){
               let newWidth = (dragElement.startWidth + dragElement.distanceX);
               if(newWidth>=1 && (dragElement.startLeft+ newWidth)<=this.roadmapWidth){
-                dragElement.view.css( "width", `${newWidth}`);
+                dragElement.view.css( "width", `${newWidth}px`);
+                dragElement.width = newWidth;
+                let newDates = this.convertToDate({
+                   start:parseInt(dragElement.view.css("left")),
+                   width:parseInt(dragElement.view.css("width"))
+                });
+                this.screenEventLayer.drawTimeLine({
+                  x:parseInt(dragElement.view.css("left"))+newWidth,
+                  label:{text:`${newDates.str}`, color:"black", top:"middle", left:"middle"},
+                  color:"rgba(255,100,100,0.7)"
+                });
               }
             }else if (dragElement.dir === "w") {
               let newLeft = (dragElement.startLeft + dragElement.distanceX);
               let newWidth = (dragElement.startWidth - dragElement.distanceX);
-              if(newLeft>=1 && newWidth>=1){
+              if(newLeft>=0 && newWidth>=1){
+                dragElement.width = newWidth;
+                dragElement.left = newLeft;
                 dragElement.view.css({
                   left:`${newLeft}px`,
                   width:`${newWidth}px`
+                });
+
+                let newDates = this.convertToDate({
+                   start:parseInt(dragElement.view.css("left")),
+                   width:parseInt(dragElement.view.css("width"))
+                });
+                this.screenEventLayer.drawTimeLine({
+                  x:(newLeft),
+                  label:{text:`${newDates.str}`, color:"black", top:"middle", left:"middle"},
+                  color:"rgba(100,255,100,0.7)"
                 });
               }
             }
           }else if (dragElement.type === "movable") {
             const {screenX,screenY} = evt;
-            dragElement.distanceX =screenX - dragElement.startX;
             let newLeft = (dragElement.startLeft + dragElement.distanceX);
-            if(newLeft>=1 && newLeft+dragElement.startWidth<=this.roadmapWidth){
+            if(newLeft>=0 && newLeft+dragElement.startWidth<=this.roadmapWidth){
               dragElement.view.css({
                 left:`${newLeft}px`
+              });
+              dragElement.left = newLeft;
+              let newDates = this.convertToDate({
+                 start:parseInt(dragElement.view.css("left")),
+                 width:parseInt(dragElement.view.css("width"))
+              });
+              this.screenEventLayer.drawTimeLine({
+                x:parseInt(dragElement.view.css("left")),
+                label:{text:`${newDates.str}`, color:"blue", top:"middle", left:"middle"},
+                color:"rgba(100,100,255,0.7)"
               });
             }
           }
@@ -368,11 +462,20 @@
         evt.stopPropagation();
         if(dragElement){
           let viewId = dragElement.view.data("id");
+          console.log(dragElement.width, dragElement.left, "---");
           let controller = this.items[viewId];
-          controller.updateMetrics();
+          let section  = controller.getSection();
+          let sectionController = this.sections[section];
+          let newWidth =dragElement.width;
+          let newLeft =dragElement.left;
+          if(newLeft && newWidth){
+            controller.updateMetrics({left:newLeft,width:newWidth});
+            sectionController?.refresh();
+          }
         }
 
         dragElement = null;
+        this.screenEventLayer.clear();
       }
       let view =document;
       view.addEventListener('mousedown', startDrag);
@@ -399,10 +502,12 @@
       }
       let newItems = []
       for(let i =0; i<items.length; i++){
-        let {label,startDate,endDate} = items[i];
+        let {label,startDate,endDate,color} = items[i];
         let viewId = makeId();
         this.items[viewId] = new RoadMapItems({
           viewId:viewId,
+          color:color,
+          section:section,
           roadmapStartDate:this.roadmapStartDate,
           roadmapEndDate:this.roadmapEndDate,
           startDate:startDate,
@@ -427,6 +532,7 @@
         });
       }
       sectionController.addItems({items:newItems});
+      this.sections[section] = sectionController;
     }
   }
   exports.controller = RoadmapController;
