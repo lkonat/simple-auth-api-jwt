@@ -11,51 +11,71 @@
       this.label = label;
       this.oneDayPx = oneDayPx;
       this.unitHeight = unitHeight;
+      this.monthStr  =["","Jan","Feb","Mar", "Apr","May", "Jun", "Aug", "Jul", "Sep", "Oct", "Nov", "Dec"];
     }
     getSection(){
       return this.section;
     }
-    getNumdays(){
+    getPixels(){
       let roadMapStartTs = new Date(this.roadmapStartDate).getTime();
+      let start =((new Date(this.startDate).getTime()-roadMapStartTs)/(1000*60*60*24))+1;
+      let end =((new Date(this.endDate).getTime()-roadMapStartTs)/(1000*60*60*24))+1;
+      let width = (end - start)+1;
       return {
-        start:((new Date(this.startDate).getTime()-roadMapStartTs)/(1000*60*60*24)),
-        end:((new Date(this.endDate).getTime()-roadMapStartTs)/(1000*60*60*24)),
+        start:start*this.oneDayPx,
+        end:end*this.oneDayPx,
+        width:width*this.oneDayPx
       }
     }
-    updateMetrics({left,width}){
-      function dateStr(date){
+    pixelsToMetric({left,width}){
+      const dateStr = (date)=>{
         let year = date.getFullYear();
         let month = date.getMonth()+1;
         let day = date.getDate();
+        let str2month = month;
         month = month>=10?month:`0${month}`;
         day = day>=10?day:`0${day}`;
         let str = `${year}-${month}-${day}`;
-        return str;
+        let str2 = `${this.monthStr[str2month]}-${day}`;
+        return {str,str2};
       }
       let newStartNday = Math.ceil(left/this.oneDayPx);
-      let newEndNday = Math.ceil((left+width)/this.oneDayPx);
+      let newEndNday = Math.ceil(((left+width))/this.oneDayPx) -1;
+      let nDaysDiff = (newEndNday - newStartNday);
       let roadMapStartDate = new Date(this.roadmapStartDate);
       let startDate1 = new Date(this.roadmapStartDate);
       let startDate2 = new Date(this.roadmapStartDate);
       let starDateX = startDate1.setDate(startDate1.getDate()+newStartNday);
-      let endDateX = startDate2.setDate(startDate2.getDate()+newEndNday);
+      let endDateX = startDate2.setDate(startDate2.getDate()+(newEndNday));
       let A = dateStr(startDate1);
       let B = dateStr(startDate2);
-      this.startDate = A;
-      this.endDate = B;
-      console.log("UPDATED ",this.startDate,A,this.endDate,B);
+      return {startDate:A.str,endDate:B.str,str:`${A.str2} to ${B.str2} ${nDaysDiff+1} days`};
+    }
+    getNumdays(){
+      let roadMapStartTs = new Date(this.roadmapStartDate).getTime();
+      let start =((new Date(this.startDate).getTime()-roadMapStartTs)/(1000*60*60*24))+1;
+      let end =((new Date(this.endDate).getTime()-roadMapStartTs)/(1000*60*60*24))+1;
+      let width = (end - start);
+      return {
+        start,
+        end,
+        width
+      }
+    }
+    updateMetrics({left,width}){
+      const {startDate,endDate} = this.pixelsToMetric({left,width});
+      this.startDate = startDate;
+      this.endDate = endDate;
     }
     display({host,top}){
       if(this.view){
         this.view.remove();
       }
-      let numDays = this.getNumdays();
-      let startNDay = numDays.start;
-      let endNDay = numDays.end;
-      let width = ((endNDay - startNDay)+1)*this.oneDayPx;
-      let str = `${this.startDate} to ${this.endDate}`;
-      let left = (startNDay+1)*this.oneDayPx;
-      this.view = $(`<div class="map-items" title="${str}" data-id="${this.viewId}" style="position:absolute; top:${top}px; left:${left}px; width:${width}px; height:${this.unitHeight}px; background-color:lightblue; color:black; text-align:center; cursor:pointer;overflow:hidden;margin:0px; outline:0.5px solid black;">${this.label}</div>`);
+      let pixels = this.getPixels();
+      let left = pixels.start;
+      let endNDay = pixels.end;
+      let width = pixels.width;
+      this.view = $(`<div class="map-items" data-id="${this.viewId}" style="position:absolute; top:${top}px; left:${left}px; width:${width}px; height:${this.unitHeight}px; background-color:lightblue; color:black; text-align:center; cursor:pointer;overflow:hidden;margin:0px; outline:0.5px solid black;">${this.label}</div>`);
       this.left = $(`<div class="stretchable stretchable-w" style="width:10px;height:100%; background-color:transparent; position:absolute; top:0px; left:0px; cursor:w-resize;margin:0px;"></div>`);
       this.right = $(`<div class="stretchable stretchable-e" style="width:10px; height:100%; background-color:transparent;position:absolute; top:0px; right:0px;cursor:e-resize;margin:0px;"></div>`);
       this.view.append(this.left,this.right);
@@ -70,9 +90,9 @@
      this.roadmapEndDate = roadmapEndDate;
      this.unitHeight = unitHeight;
      this.oneDayPx = oneDayPx;
-     this.box = $(`<div style=" margin:0px;border-radius:5px;width:100%; -webkit-user-select: none; -ms-user-select: none;user-select: none; padding:0px;"></div>`);
-     this.header = $(`<div style="paddin-left:3px;"><h3>${this.name}</h3></div>`);
-     this.container = $(`<div style="min-height:30px; width:100%; position:relative;-webkit-user-select: none; -ms-user-select: none;user-select: none;margin:0px;padding:0px;"></div>`);
+     this.box = $(`<div class="roadmap-section-box" style=" margin:0px;width:100%; -webkit-user-select: none; -ms-user-select: none;user-select: none; padding:0px;"></div>`);
+     this.header = $(`<div style="padding-left:3px;"><span class="roadmap-section-header">${this.name}</span></div>`);
+     this.container = $(`<div class="roadmap-section-container" style="min-height:30px; width:100%; position:relative;-webkit-user-select: none; -ms-user-select: none;user-select: none;margin:0px;padding:0px;"></div>`);
      this.box.append(this.header,this.container);
      this.host.append(this.box);
      this.lines =[];
@@ -153,14 +173,15 @@
      this.host = host;
      this.svgns = "http://www.w3.org/2000/svg";
      this.screen = $(`<svg style=" -webkit-user-select: none; -ms-user-select: none;user-select: none;pointer-events: none; margin:0px; padding:0px; width:100%; height:100%;background-color:${this.background?this.background:"transparent"}; position:absolute; top:0px; left:0px;" ></svg>`);
-     this.host.append(this.screen);
      this.fontSize = 12;
-
+   }
+   init(){
+     this.host.append(this.screen);
    }
    clear(){
        this.screen.empty();
    }
-   drawTimeLine({height,width,label, x,color}){
+   drawTimeLine({height,width,label, x,color,className}){
      const lineHeight =height?height:parseInt(this.screen.css("height"));
      let rectWidth = width?width: this.oneDayPx;
      const screen = this.screen[0];
@@ -173,6 +194,9 @@
      line.setAttribute('width',rectWidth);
      line.setAttribute('height',lineHeight);
      line.setAttribute('style', `fill:${color?color:"rgba(225,100,100,0.2)"};`);
+     if(className){
+       line.setAttribute('class', className);
+     }
      if(label){
         let labelText = label.text;
         let color = label.color;
@@ -185,7 +209,10 @@
         let closeToStart = distToStart<distToEnd;
         text.setAttribute('x',closeToStart?x+this.oneDayPx:x-text.getBBox().width);
         text.setAttribute('y', labelY);
-        text.setAttribute('style', `fill:${color?color:"red"};  font-size:${this.fontSize}px;font-family: monospace, monospace;`);
+        text.setAttribute('style', `font-size:${this.fontSize}px;font-family: monospace, monospace;`);
+        if(label.className){
+          text.setAttribute('class', label.className);
+        }
      }
      return item;
    }
@@ -193,25 +220,25 @@
   class ScreenLayer extends SVGScreenLayers{
     constructor(args) {
       super(args);
-      this.screen.css({
-        // "background-image":"linear-gradient(to right, rgba(15, 58, 79,0.8), rgba(15, 58, 79,0.5))",
-        "background-image":"linear-gradient(to bottom, rgba(5, 5, 5,0.5),rgba(2, 148, 181,0.5),rgba(5, 5, 5,0.5))"
-      })
+      this.screen = $(`<svg class="screen-layer1" style=" -webkit-user-select: none; -ms-user-select: none;user-select: none;pointer-events: none; margin:0px; padding:0px; width:100%; height:100%;background-color:${this.background?this.background:"transparent"}; position:absolute; top:0px; left:0px;" ></svg>`);
+      this.init();
     }
     showToday(){
       let roadMapStartTs = new Date(this.roadmapStartDate).getTime();
       let nDayPassed =((new Date().getTime()-roadMapStartTs)/(1000*60*60*24));
       let x = Math.round((nDayPassed*this.oneDayPx)/this.oneDayPx) * this.oneDayPx;
       this.todayLine =  this.drawTimeLine({
-          label:{text:"Today", color:"red", top:"middle"},
           x,
-          color:"rgba(200,100,100,0.2)"
+          label:{text:"Today",top:true, className:"today-label"},
+          className:"today-line"
       });
     }
   }
   class ScreenEventLayer extends SVGScreenLayers{
     constructor(args) {
       super(args);
+      this.screen = $(`<svg class="screen-event-layer" style=" -webkit-user-select: none; -ms-user-select: none;user-select: none;pointer-events: none; margin:0px; padding:0px; width:100%; height:100%;background-color:${this.background?this.background:"transparent"}; position:absolute; top:0px; left:0px;" ></svg>`);
+      this.init();
     }
     drawTimeLine(args){
       this.clear();
@@ -230,10 +257,10 @@
       this.roadmapEndDate = roadmapEndDate;
       this.unitHeight = unitHeight;
       this.oneDayPx = oneDayPx;
-      this.background = "rgb(18,20,20)";
+      this.background = "white";
       this.labelColor = "lightblue";
-      this.box = $(`<div style="padding:0px; margin:0px;position:relative; width:${this.width}px; height:${this.height}px; background-color:${this.background}; color:${this.labelColor};"></div>`);
-      this.screen = $(`<svg style=" -webkit-user-select: none; -ms-user-select: none;user-select: none;pointer-events: none;margin:0px; padding:0px; width:100%; height:100%;background-color:transparent; position:absolute; top:0px; left:0px;" ></svg>`);
+      this.box = $(`<div class="meter-box" style="padding:0px; margin:0px;position:relative; width:${this.width}px; height:${this.height}px;"></div>`);
+      this.screen = $(`<svg class="meter-screen" style=" -webkit-user-select: none; -ms-user-select: none;user-select: none;pointer-events: none;margin:0px; padding:0px; width:100%; height:100%;background-color:transparent; position:absolute; top:0px; left:0px;" ></svg>`);
       this.box.append(this.screen);
       this.host.append(this.box);
       this.monthStr  =["","Jan","Feb","Mar", "Apr","May", "Jun", "Aug", "Jul", "Sep", "Oct", "Nov", "Dec"];
@@ -255,6 +282,7 @@
           rect.setAttribute('width', w);
           rect.setAttribute('height', lineHeight-2);
           rect.setAttribute('style', `fill: ${color}; font-size:${this.fontSize}px;`);
+          rect.setAttribute('class',"meter-repers");
         }
       }
       const showMonth= ({i,text,x,y,howManyDay})=>{
@@ -263,16 +291,17 @@
         screen.appendChild(item);
         screen.appendChild(rect);
         item.textContent = text;
-        // item.setAttribute('x',i==1?x:x-this.oneDayPx);
         item.setAttribute('x',(x)+((howManyDay*this.oneDayPx)/2));
         item.setAttribute('y', y);
-        item.setAttribute('style', `fill:${color}; font-size:${this.fontSize}px;`);
+        item.setAttribute('style', `font-size:${this.fontSize}px;`);
+        item.setAttribute('class',"meter-months");
 
         rect.setAttribute('x', x);
         rect.setAttribute('y', y+3);
         rect.setAttribute('width', this.oneDayPx);
         rect.setAttribute('height', lineHeight);
-        rect.setAttribute('style', `fill: ${color}; font-size:${this.fontSize}px;`);
+        rect.setAttribute('style', `font-size:${this.fontSize}px;`);
+        rect.setAttribute('class',"meter-repers");
         showRepers({text,from:x+this.oneDayPx,y,to:(x+(howManyDay*this.oneDayPx)),screen});
       }
       const lastDay= ({x,y})=>{
@@ -282,7 +311,8 @@
         rect.setAttribute('y', y);
         rect.setAttribute('width', this.oneDayPx);
         rect.setAttribute('height', lineHeight);
-        rect.setAttribute('style', `fill: ${color}; font-size:${this.fontSize}px;`);
+        rect.setAttribute('style', `font-size:${this.fontSize}px;`);
+        rect.setAttribute('class',"meter-repers");
       }
       let idx = this.startIdx;
       for(let i=1; i<=12; i++){
@@ -296,11 +326,13 @@
       lastDay({x:idx,y:this.fontSize});
     }
   }
+
   class RoadmapController {
     constructor({host,startDate,endDate}) {
+      this.theme = "dark";
       this.roadmapStartDate =startDate;
       this.roadmapEndDate =endDate;
-      this.unitHeight=25;
+      this.unitHeight=20;
       this.oneDayPx = 5;
       this.host = host;
       this.sections = {};
@@ -335,13 +367,13 @@
       return {starDate,endDate,str:`${starDate} to ${endDate} ${w} days`};
     }
     init(){
-      this.mainContainer = $(`<div style="width:100%;"></div>`);
+      this.mainContainer = $(`<div class="roadmap-main-container theme-${this.theme}" style="max-width:${this.roadmapWidth}px; margin:0 auto;"></div>`);
       this.host.append(this.mainContainer);
       this.topContainer = $(`<div style="width:100%;"></div>`);
-      this.scrollArea = $(`<div style="overflow:scroll; width:100%; border-bottom:1px solid lightgrey; padding:0px; padding-bottom:${this.scrollPadding}px;"></div>`);
-      this.renderArea = $(`<div style="padding:0px;margin:0; position:relative; width:${this.roadmapWidth}px; background-image: linear-gradient(to right, rgb(10, 10, 10),rgb(10, 10, 10), rgb(10, 10, 10),rgb(4, 4, 4));"></div>`);
-      this.meterContainer = $(`<div style="padding:0px;width:100%;margin:0;"></div>`);
-      this.mapsContainer = $(`<div style="padding:0px;margin:0px;width:100%; height:${this.height -this.scrollPadding}px; overflow:scroll;padding-right:${this.scrollPadding}px;"></div>`);
+      this.scrollArea = $(`<div class="roadmap-scroll-area" style="overflow:scroll; width:100%;  padding:0px; padding-bottom:${this.scrollPadding}px;"></div>`);
+      this.renderArea = $(`<div class="roadmap-renderArea" style="padding:0px;margin:0; position:relative; width:${this.roadmapWidth}px;"></div>`);
+      this.meterContainer = $(`<div class="roadmap-meter-container" style="padding:0px;width:100%;margin:0;"></div>`);
+      this.mapsContainer = $(`<div class="roadmap-map-container" style="padding:0px;margin:0px;width:100%; height:${this.height -this.scrollPadding}px; overflow:scroll;"></div>`);
       this.scrollArea.append(this.renderArea);
       this.renderArea.append(this.meterContainer,this.mapsContainer);
       this.mainContainer.append(this.topContainer,this.scrollArea);
@@ -378,6 +410,8 @@
             let westDir = evt.target.classList.contains('stretchable-w');
             const {screenX,screenY} = evt;
             let view = $(evt.target).parent(".map-items");
+            let viewId = view.data("id");
+            let controller = this.items[viewId];
             $(".map-item-selected").removeClass("map-item-selected");
             view.addClass("map-item-selected");
             let width = view.width(), left = view[0].offsetLeft;
@@ -391,11 +425,15 @@
               startY:screenY,
               left,
               width,
+              controller,
+              section:controller?.getSection(),
               dir:estDir?"e":"w"
             };
           }else if (evt.target?.classList?.contains('map-items')) {
             const {screenX,screenY} = evt;
             let view = $(evt.target);
+            let viewId = view.data("id");
+            let controller = this.items[viewId];
             $(".map-item-selected").removeClass("map-item-selected");
             view.addClass("map-item-selected");
             let width = view.width(), left = view[0].offsetLeft;
@@ -407,7 +445,9 @@
               startX:screenX,
               startY:screenY,
               left,
-              width
+              width,
+              controller,
+              section:controller?.getSection(),
             };
           }
       }
@@ -424,77 +464,64 @@
               if(newWidth>=1 && (dragElement.startLeft+ newWidth)<this.roadmapWidth){
                 dragElement.view.css( "width", `${newWidth}px`);
                 dragElement.width = newWidth;
-                let newDates = this.convertToDate({
-                   start:parseInt(dragElement.view.css("left")),
-                   width:parseInt(dragElement.view.css("width"))
-                });
+                let newDates = dragElement.controller?.pixelsToMetric({left:parseInt(dragElement.view.css("left")),width:parseInt(dragElement.view.css("width"))});
                 this.screenEventLayer.drawTimeLine({
-                  x:parseInt(dragElement.view.css("left"))+newWidth,
-                  label:{text:`${newDates.str}`, color:"lightblue", top:"middle", left:"middle"},
-                  color:"rgba(255,100,100,0.7)"
+                  x:(parseInt(dragElement.view.css("left"))+(newWidth-this.oneDayPx)),
+                  label:{text:`${newDates.str}`, className:"moving-label", top:true},
+                  className:"moving-lines"
                 });
               }
             }else if (dragElement.dir === "w") {
               let newLeft = (dragElement.startLeft + dragElement.distanceX);
               let newWidth = (dragElement.startWidth - dragElement.distanceX);
-              if(newLeft>=0 && newWidth>=1){
+              if(newLeft>=1 && newWidth>=1){
                 dragElement.width = newWidth;
                 dragElement.left = newLeft;
                 dragElement.view.css({
                   left:`${newLeft}px`,
                   width:`${newWidth}px`
                 });
-
-                let newDates = this.convertToDate({
-                   start:parseInt(dragElement.view.css("left")),
-                   width:parseInt(dragElement.view.css("width"))
-                });
+                let newDates = dragElement.controller?.pixelsToMetric({left:parseInt(dragElement.view.css("left")),width:parseInt(dragElement.view.css("width"))});
                 this.screenEventLayer.drawTimeLine({
                   x:(newLeft),
-                  label:{text:`${newDates.str}`, color:"lightblue", top:"middle", left:"middle"},
-                  color:"rgba(100,255,100,0.7)"
+                  label:{text:`${newDates.str}`, className:"moving-label", top:true},
+                  className:"moving-lines"
                 });
               }
             }
           }else if (dragElement.type === "movable") {
             const {screenX,screenY} = evt;
             let newLeft = (dragElement.startLeft + dragElement.distanceX);
-            if(newLeft>=0 && newLeft+dragElement.startWidth<this.roadmapWidth){
+            if(newLeft>=1 && newLeft+dragElement.startWidth<this.roadmapWidth){
               dragElement.view.css({
                 left:`${newLeft}px`
               });
               dragElement.left = newLeft;
-              let newDates = this.convertToDate({
-                 start:parseInt(dragElement.view.css("left")),
-                 width:parseInt(dragElement.view.css("width"))
-              });
+              let newDates = dragElement.controller?.pixelsToMetric({left:parseInt(dragElement.view.css("left")),width:parseInt(dragElement.view.css("width"))});
               this.screenEventLayer.drawTimeLine({
                 x:parseInt(dragElement.view.css("left")),
-                label:{text:`${newDates.str}`, color:"lightblue", top:"middle", left:"middle"},
-                color:"rgba(100,100,255,0.7)"
+                label:{text:`${newDates.str}`, className:"moving-label", top:true},
+                className:"moving-lines"
               });
             }
           }
-          // console.log(dragElement.startLeft, dragElement.distanceX, dragElement.dir);
-          // console.log(dragElement);
         }else{
           let isStrechable  =evt.target?.classList?.contains('stretchable');
           let isMapItem= evt.target?.classList?.contains('map-items');
+
           if(isStrechable || isMapItem){
             let view = isStrechable?$(evt.target).parent(".map-items"):$(evt.target);
             let width = view.width(), left = view[0].offsetLeft, top=view[0].offsetTop;
-            let newDates = this.convertToDate({
-               start:left,
-               width:width
-            });
+            let viewId = view.data("id");
+            let controller = this.items[viewId];
+            let newDates = controller?.pixelsToMetric({left:left,width:width});
             this.screenEventLayer.drawTimeLine({
               x:left,
               height:30,
               width:width,
-              label:{text:`${newDates.str}`, color:"lightblue", top:"middle", left:"middle"},
-              color:"rgba(10,100,10,0.5)"
+              label:{text:`${newDates.str}`, className:"hover-label", top:true},
+              className:"hover-lines"
             });
-            console.log("entered")
           }else{
             this.screenEventLayer.clear();
           }
@@ -504,10 +531,8 @@
         evt.preventDefault();
         evt.stopPropagation();
         if(dragElement){
-          let viewId = dragElement.view.data("id");
-          console.log(dragElement.width, dragElement.left, "---");
-          let controller = this.items[viewId];
-          let section  = controller.getSection();
+          let controller = dragElement.controller;
+          let section  = dragElement.section;
           let sectionController = this.sections[section];
           let newWidth =dragElement.width;
           let newLeft =dragElement.left;
@@ -516,7 +541,6 @@
             sectionController?.refresh();
           }
         }
-
         dragElement = null;
         this.screenEventLayer.clear();
       }

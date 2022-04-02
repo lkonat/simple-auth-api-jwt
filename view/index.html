@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title></title>
+    <link rel="stylesheet" href="roadmap.css">
   </head>
   <style media="screen">
     .selected{
@@ -17,6 +18,25 @@
     svg {
   transition: transform 0.1s linear 0.1s;
 }
+/* ::-webkit-scrollbar {
+  width: 0px;
+  height:0px;
+} */
+
+/* Track */
+/* ::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+/* ::-webkit-scrollbar-thumb {
+  background: #888;
+} */
+
+/* Handle on hover */
+/* ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}  */
   </style>
   <body style="background-color:black;">
     <script src="https://code.jquery.com/jquery-2.0.2.min.js"> </script>
@@ -77,33 +97,33 @@
        {label:`December`,startDate:`2022-12-01`, endDate:`2022-12-31`},
      ]
    });
-   // controler.addItems({
-   //   section:"Work",
-   //   items:[
-   //     {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
-   //     {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
-   //     {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
-   //     {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
-   //   ]
-   // });
-   // controler.addItems({
-   //   section:"Work 3",
-   //   items:[
-   //     {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
-   //     {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
-   //     {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
-   //     {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
-   //   ]
-   // });
-   // controler.addItems({
-   //   section:"Work 4",
-   //   items:[
-   //     {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
-   //     {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
-   //     {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
-   //     {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
-   //   ]
-   // });
+   controler.addItems({
+     section:"Work",
+     items:[
+       {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
+       {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
+       {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+       {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
+     ]
+   });
+   controler.addItems({
+     section:"Work 3",
+     items:[
+       {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
+       {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
+       {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+       {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
+     ]
+   });
+   controler.addItems({
+     section:"Work 4",
+     items:[
+       {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
+       {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
+       {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+       {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
+     ]
+   });
     </script>
   </body>
 </html>
