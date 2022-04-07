@@ -38,10 +38,12 @@
   background: #555;
 }  */
   </style>
-  <body style="background-color:black;">
+  <body style="background-color:white;">
     <script src="https://code.jquery.com/jquery-2.0.2.min.js"> </script>
     <!-- <script src="AwaTree.js" charset="utf-8"></script> -->
       <script src="Roadmap.js" charset="utf-8"></script>
+      <script src="CanvasDoc.js" charset="utf-8"></script>
+      <script src="RoadmapCanvas.js" charset="utf-8"></script>
     <script type="text/javascript">
 
     //
@@ -81,49 +83,52 @@
     // });
 
 
-   const controler = new Roadmap.controller({host:$(`body`),startDate:"2022-01-01", endDate:"2022-12-31"});
+   // const controler = new Roadmap.controller({host:$(`body`),startDate:"2022-01-01", endDate:"2022-12-31"});
+   //
+   // controler.addItems({
+   //   section:"Learning",
+   //   items:[
+   //     {label:`January`,startDate:`2022-01-01`, endDate:`2022-01-31`},
+   //     {label:`February`,startDate:`2022-02-01`, endDate:`2022-02-28`},
+   //     {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
+   //     {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
+   //     {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+   //     {label:`task4`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+   //     {label:`task5`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+   //     {label:`task6`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+   //     {label:`December`,startDate:`2022-12-01`, endDate:`2022-12-31`},
+   //   ]
+   // });
+   // controler.addItems({
+   //   section:"Work",
+   //   items:[
+   //     {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
+   //     {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
+   //     {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+   //     {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
+   //   ]
+   // });
+   // controler.addItems({
+   //   section:"Work 3",
+   //   items:[
+   //     {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
+   //     {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
+   //     {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+   //     {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
+   //   ]
+   // });
+   // controler.addItems({
+   //   section:"Work 4",
+   //   items:[
+   //     {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
+   //     {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
+   //     {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
+   //     {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
+   //   ]
+   // });
 
-   controler.addItems({
-     section:"Learning",
-     items:[
-       {label:`January`,startDate:`2022-01-01`, endDate:`2022-01-31`},
-       {label:`February`,startDate:`2022-02-01`, endDate:`2022-02-28`},
-       {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
-       {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
-       {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
-       {label:`task4`,startDate:`2022-05-31` , endDate:`2022-06-20`},
-       {label:`task5`,startDate:`2022-05-31` , endDate:`2022-06-20`},
-       {label:`task6`,startDate:`2022-05-31` , endDate:`2022-06-20`},
-       {label:`December`,startDate:`2022-12-01`, endDate:`2022-12-31`},
-     ]
-   });
-   controler.addItems({
-     section:"Work",
-     items:[
-       {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
-       {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
-       {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
-       {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
-     ]
-   });
-   controler.addItems({
-     section:"Work 3",
-     items:[
-       {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
-       {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
-       {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
-       {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
-     ]
-   });
-   controler.addItems({
-     section:"Work 4",
-     items:[
-       {label:`task1`,startDate:`2022-03-29`, endDate:`2022-04-29`},
-       {label:`task2`,startDate:`2022-04-28` , endDate:`2022-05-29`},
-       {label:`task3`,startDate:`2022-05-31` , endDate:`2022-06-20`},
-       {label:`task4`,startDate:`2022-01-30` , endDate:`2022-08-30`}
-     ]
-   });
+
+   const controller = new RoadmapCanvas.controller({host:$("body"),startDate:"2022-01-01", endDate:"2022-12-31"});
     </script>
   </body>
 </html>

@@ -544,7 +544,7 @@
         dragElement = null;
         this.screenEventLayer.clear();
       }
-      let view =document;
+      let view = document;
       view.addEventListener('mousedown', startDrag);
       view.addEventListener('mousemove',drag);
       view.addEventListener('mouseup', endDrag);
