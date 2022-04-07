@@ -1,0 +1,170 @@
+.roadmap-renderArea{
+  background-color: white !important;
+}
+.roadmap-main-container{
+
+}
+.roadmap-scroll-area{
+
+}
+.meter-box{
+  background-color:white!important;
+  color:black !important;
+}
+.meter-repers{
+  fill:grey !important;
+}
+.meter-months{
+  fill:black !important;
+}
+.roadmap-map-container{
+
+}
+.meter-screen{
+
+}
+.screen-layer1{
+  background-color:rgba(10,10,10,0)!important
+}
+.screen-event-layer{
+
+}
+
+.today-label{
+  fill:red;
+  font-family: monospace, monospace;
+}
+.today-line{
+  fill:rgba(200,0,0,0.2)!important
+}
+
+
+.moving-label{
+  fill:black!important
+}
+.moving-lines{
+  fill:rgba(100,200,100,0.3)!important
+}
+
+.hover-label{
+  fill:black!important
+}
+.hover-lines{
+  fill:rgba(100,200,100,0.2)!important
+}
+
+.roadmap-section-box{
+}
+.roadmap-section-header{
+  color:black;
+}
+.roadmap-section-container{
+}
+.map-items{
+  background-color:white!important;
+  color:black !important;
+  outline:1px solid lightgrey !important;
+}
+.map-item-selected{
+  z-index:1;
+  background-color: black !important;
+  color:white !important;
+}
+.stretchable{
+
+}
+.stretchable-w{
+  background-color:dodgerblue;
+}
+.stretchable-e{
+  background-color:dodgerblue;
+}
+
+/* dark them */
+
+.theme-dark .roadmap-renderArea{
+  background-image: linear-gradient(to right, rgb(4, 4, 4),rgb(10, 10, 10), rgb(10, 10, 10),rgb(4, 4, 4));
+}
+.theme-dark .roadmap-main-container{
+
+}
+.theme-dark .roadmap-scroll-area{
+
+}
+.theme-dark .meter-box{
+  background-color:rgb(18,20,20) !important;
+  color:lightblue !important;
+}
+.theme-dark .meter-repers{
+  fill:lightblue !important;
+}
+.theme-dark .meter-months{
+  fill:lightblue !important;
+}
+.theme-dark .roadmap-map-container{
+
+}
+.theme-dark .meter-screen{
+
+}
+.theme-dark .screen-layer1{
+  /* background-image:linear-gradient(to bottom, rgba(5, 5, 5,0.5),rgba(2, 148, 181,0.5),rgba(5, 5, 5,0.5)) */
+  background-image:linear-gradient(to bottom, rgba(5, 5, 5,0.5),rgba(100, 148, 181,0.5),rgba(5, 5, 5,0.5))
+}
+.theme-dark .screen-event-layer{
+
+}
+
+.theme-dark .today-label{
+  fill:coral;
+  font-family: monospace, monospace;
+}
+.theme-dark .today-line{
+ fill:rgba(200,100,0,0.3)!important;
+}
+
+
+.theme-dark .moving-label{
+  fill:lightgreen!important
+}
+.theme-dark .moving-lines{
+  fill:rgba(100,200,100,0.2)!important
+}
+
+.theme-dark .hover-label{
+  fill:lightgreen!important
+}
+.theme-dark .hover-lines{
+  fill:rgba(100,200,100,0.2)!important
+}
+
+.theme-dark .roadmap-section-box{
+  outline:0.3px solid rgb(70,70,70);
+}
+.theme-dark .roadmap-section-header{
+  color:lightblue;
+}
+.theme-dark .roadmap-section-container{
+
+}
+.theme-dark .map-items{
+  /* background-color:rgba(10,100,200,0.7)!important; */
+  background-color:black !important;
+  color:white !important;
+  outline:1px solid dodgerblue !important;
+  border-radius:3px;
+}
+.theme-dark .map-item-selected{
+  z-index:1;
+  background-color: black !important;
+  color:white !important;
+}
+.theme-dark .stretchable:hover{
+  background-color: rgba(10,100,200,0.9) !important;
+}
+.theme-dark .stretchable-w{
+  background-color:dodgerblue;
+}
+.theme-dark .stretchable-e{
+  background-color:dodgerblue;
+}
